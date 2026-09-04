@@ -1,0 +1,82 @@
+{
+  "project_name": "Riffeltippen - SkytterDuellen",
+  "archetype": "SWISS & HIGH-CONTRAST / NORDIC PRECISION SPORTS",
+  "emotional_tone": "Crisp, precise, competitive, high-stakes Nordic sports tipping",
+  "language": "Norwegian (nb-NO)",
+  "colors": {
+    "theme": "Light primary with Norwegian Crimson Red accents",
+    "background_primary": "#FBFBFD",
+    "background_secondary": "#FFFFFF",
+    "background_card": "#FFFFFF",
+    "background_muted": "#F1F5F9",
+    "border_subtle": "#E2E8F0",
+    "border_accent": "#FCA5A5",
+    "text_primary": "#0F172A",
+    "text_secondary": "#475569",
+    "text_muted": "#94A3B8",
+    "brand_primary": "#D92525",
+    "brand_primary_hover": "#B91C1C",
+    "brand_light": "#FEF2F2",
+    "accent_gold": "#EAB308",
+    "accent_green": "#16A34A",
+    "status_live_pulse": "#EF4444"
+  },
+  "typography": {
+    "heading_font": "Outfit, Chivo, sans-serif",
+    "body_font": "Inter, DM Sans, sans-serif",
+    "mono_font": "JetBrains Mono, monospace",
+    "hierarchy": {
+      "hero_title": "text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900",
+      "section_title": "text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900",
+      "card_title": "text-lg sm:text-xl font-bold text-slate-900",
+      "body": "text-base text-slate-700 leading-relaxed",
+      "badge": "text-xs font-semibold uppercase tracking-wider",
+      "stats_number": "font-mono font-bold text-2xl text-slate-900"
+    }
+  },
+  "spacing_and_layout": {
+    "container_padding": "p-4 sm:p-6 lg:p-8",
+    "grid_gap": "gap-6 lg:gap-8",
+    "bento_strategy": "MODE B: High Density Precision Grid with distinct 1-U-2 tipping controls and crisp target indicators",
+    "card_style": "Bordered flat white surface with subtle 1px border (#E2E8F0), crisp inner padding (p-6), hover subtle lift and crimson border highlight"
+  },
+  "components": {
+    "navigation_header": {
+      "style": "Sticky top bar with crystal blur backdrop (bg-white/85 backdrop-blur-md border-b border-slate-200)",
+      "elements": "Logo with Target Icon + 'Riffeltippen', Nav Links (Dueller, Resultater, Lederboard, Mine Tips), User Points Pill, Login/Register or Profile Dropdown, Admin Mode Badge (if admin)"
+    },
+    "duel_card": {
+      "layout": "Asymmetric duel preview showing Shooter 1 (Red/White badge) vs Shooter 2 (Blue/White badge) with target graphic",
+      "tipping_buttons": "Tri-state segmented selection: [ 1 (Hjemme) | U (Uavgjort) | 2 (Borte) ] with odds/tip percentages and active selection state in vibrant Norwegian Red",
+      "match_info": "Disciplines (f.eks. 10m Luftrifle, 50m Match, Biathlon Sprint), Venue, Start Time / Live Status"
+    },
+    "leaderboard": {
+      "layout": "High-density clean ranking table with podium highlights for top 3 (Gull, Sølv, Bronse badges), correct tips counter, total points, and accuracy rate %"
+    },
+    "admin_panel": {
+      "layout": "Clean dashboard modal/tab with duel creation form (select shooters, discipline, date/time) and result input module (score 10.9 precision input, winner/draw declaration, automated tip evaluation button)"
+    },
+    "results_list": {
+      "layout": "Completed duels timeline with exact scores (e.g. 314.5 vs 312.1), user's tip status badge (Riktig / Feil / Ikke tippet), and points earned notification"
+    }
+  },
+  "image_urls": {
+    "hero_shooter": "https://images.unsplash.com/photo-1761144530756-47ecd564f8ef?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1OTV8MHwxfHNlYXJjaHwyfHxzaG9vdGluZyUyMHRhcmdldCUyMHJhbmdlJTIwYXRobGV0ZXxlbnwwfHx8fDE3ODg1NDQ1MDN8MA&ixlib=rb-4.1.0&q=85",
+    "shooting_target_board": "https://images.unsplash.com/photo-1577905027671-c5cc33c825ed?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDF8MHwxfHNlYXJjaHwzfHxyaWZsZSUyMHNob290aW5nJTIwY29tcGV0aXRpb24lMjBhdGhsZXRlJTIwdGFyZ2V0fGVufDB8fHx8MTc4ODU0NDQ5NHww&ixlib=rb-4.1.0&q=85",
+    "range_competition": "https://images.unsplash.com/photo-1687384475723-6a1c70a91920?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDF8MHwxfHNlYXJjaHw0fHxyaWZsZSUyMHNob290aW5nJTIwY29tcGV0aXRpb24lMjBhdGhsZXRlJTIwdGFyZ2V0fGVufDB8fHx8MTc4ODU0NDQ5NHww&ixlib=rb-4.1.0&q=85"
+  },
+  "instructions_to_main_agent": [
+    "Always use Norwegian terminology throughout the UI (f.eks. 'Aktive Dueller', 'Sett ditt tip', 'Uavgjort', 'Resultatliste', 'Lederboard', 'Registrer resultat', 'Mine tips').",
+    "Ensure the tipping controls (1 - U - 2) feel responsive, crisp, and high contrast. When selected, highlight with bg-red-600 text-white shadow-sm.",
+    "Implement clear role separation (Demobruker vs Admin). Provide an easy top toggle or login preset to demonstrate both User experience and Admin duel creation/result registration.",
+    "Add 'data-testid' to all interactive elements including tip buttons, login inputs, admin duel submission, and leaderboard tabs.",
+    "Include bullseye SVG target graphics and precision decimal score displays (f.eks. 10.9, 10.8) to reinforce the rifle shooting aesthetic.",
+    "Do NOT use pure black background (#000000) or generic blue SaaS theme. Stick strictly to crisp white/slate background with crimson red accent."
+  ],
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "Do NOT apply universal transition (transition: all). Use specific property transitions.",
+    "Ensure header has background or backdrop-blur (never fully transparent over content).",
+    "Use proper contrast for hover/focus states.",
+    "All interactive elements must have data-testid attributes."
+  ]
+}

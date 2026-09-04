@@ -1,0 +1,47 @@
+{
+  "summary": "Full backend + frontend E2E test of Riffeltippen. Backend: 29 pytest cases (auth, duels CRUD, tips, results/points, leaderboard, edge cases) - 27 passed. Frontend: all 12 requested flows verified end-to-end on the public preview URL (register->auto-login, login/logout, admin nav+panel, create duel appears on home, tip 1/U/2 with count increment + my-pick indicator, change tip, anonymous tip -> /login redirect, admin result registration -> duell moves to Resultater and off open list, +3 points reflected in points pill/Mine Tips 'Riktig +3'/leaderboard, leaderboard ranking with correct/accuracy, admin delete duel). No blocking issues found.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/duels/{id}/tip, POST /api/duels/{id}/result, DELETE /api/duels/{id}", "issue": "Malformed duel id returns 500 Internal Server Error (bson.errors.InvalidId raised by ObjectId(duel_id) - see backend.err.log). Should return 400/404. Suggest a helper that validates ObjectId.is_valid() before querying."},
+      {"endpoint": "POST /api/auth/login", "issue": "No brute-force protection/lockout: 6 consecutive wrong passwords all returned 401 (no 429, no account lock). Playbook expects lockout after 5 failed attempts."},
+      {"endpoint": "auth (design note)", "issue": "Auth uses Bearer token in localStorage, not httpOnly cookies (get_current_user does read an access_token cookie but login/register never Set-Cookie). Playbook item 'httpOnly cookies on login' not met - flag only, since Bearer-in-localStorage was the stated design. Token TTL 7 days, no refresh/revocation."},
+      {"endpoint": "GET /api/leaderboard", "issue": "N+1 queries: 2 count_documents per user inside a loop; will not scale. Consider an aggregation pipeline."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "MyTips (/mine-tips)", "issue": "No auth guard and no .catch on api.get('/my-tips'). Anonymous direct navigation leaves the page stuck on 'Laster...' forever and throws an unhandled promise rejection (401) in console. Add a redirect to /login and error state.", "selector": "[data-testid=\"mytips-list\"]", "priority": "MEDIUM"},
+      {"component": "Router (App.js)", "issue": "Unknown routes (e.g. /tullball) render only the navbar - no 404 page or catch-all redirect.", "selector": "body", "priority": "LOW"},
+      {"component": "Leaderboard / Results / Admin pages", "issue": "api.get() calls have no .catch/error state; a backend failure leaves permanent 'Laster...' text.", "selector": "[data-testid=\"leaderboard-table\"]", "priority": "LOW"},
+      {"component": "Admin delete-duel", "issue": "Destructive delete (removes duel + all its tips) fires immediately with no confirmation dialog.", "selector": "[data-testid^=\"delete-duel-\"]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Duels hero (mobile 390px)", "issues": ["Horizontal white->transparent gradient does not cover the right side on narrow screens, so hero paragraph text ('klatre pa lederboardet') sits over the bright photo with weak contrast. Use a vertical/stronger overlay below sm breakpoint."]},
+      {"screen": "Duel card pick buttons", "issues": ["Inactive tip count/sub-label uses text-slate-400 on white (~2.6:1) - below WCAG AA for small text."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/backend/tests/cleanup_test_data.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Validate ObjectId in duel routes (tip/result/delete) and return 400/404 instead of 500",
+    "Add login rate limiting / lockout after 5 failed attempts (playbook requirement)",
+    "Guard /mine-tips for anonymous users (redirect to /login) and add .catch/error states to page fetches",
+    "Add 404 catch-all route",
+    "Optional: confirmation dialog before duel deletion; aggregation for leaderboard"
+  ],
+  "critical_code_review_comments": [
+    "server.py: every ObjectId(duel_id) call is unguarded -> 500s on any malformed id (also DELETE /api/duels/{id} silently returns ok:true for non-existent ids; consider 404).",
+    "set_result point reversal works but is not atomic/transactional; concurrent result updates could double-award points.",
+    "seed_admin correctly re-hashes the admin password when ADMIN_PASSWORD changes and bcrypt hash verified as $2b$ format in DB.",
+    "DuelCard keeps pick in local state initialized from prop; if parent re-fetches with a different pick (e.g. tip changed elsewhere) the state will not sync (no useEffect on myPick)."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py", "/app/backend/tests/cleanup_test_data.py"],
+  "success_rate": {"backend": "93% (27/29)", "frontend": "100% of requested flows (12/12)"},
+  "seed_data_creation": "Created and then deleted temporary users (TEST_*@test.no, tester*@test.no) and QA duels; ran cleanup_test_data.py so DB is back to 3 demo duels + admin only, tip_counts recomputed to 0.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "admin@riffeltippen.no / Skyting2026! (works, role=admin). Test users created fresh via /register during testing and cleaned up.",
+  "context_for_next_testing_agent": "Run `pytest /app/backend/tests/backend_test.py -q` for regression; 2 known failures are real product gaps (500 on invalid ObjectId, no brute-force lockout). Use /app/backend/tests/cleanup_test_data.py after runs to purge TEST_/tester users, QA duels and recompute tip_counts. All core UI flows already verified green.",
+  "rca_of_the_issue": "500 on tip/result/delete: ObjectId(duel_id) is constructed directly from the path parameter, so bson raises InvalidId before any handler logic, producing an unhandled 500. Reproduce: POST {BASE}/api/duels/not-an-objectid/tip with a valid Bearer token."
+}

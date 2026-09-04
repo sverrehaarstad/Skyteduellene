@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import api, { formatApiError } from "@/lib/api";
 import { toast } from "sonner";
-import { MapPin, Clock } from "lucide-react";
+import { MapPin, Clock, ChevronRight } from "lucide-react";
+import { ShooterAvatar } from "@/components/ShooterAvatar";
 
 const PickButton = ({ label, sub, active, onClick, count, testid }) => (
   <button
@@ -61,14 +62,14 @@ export const DuelCard = ({ duel, myPick, onTipped }) => {
       </div>
 
       <div className="flex items-center justify-between gap-3 mb-4">
-        <div className="flex-1 text-center">
-          <div className="w-11 h-11 mx-auto rounded-full bg-[#D92525] text-white flex items-center justify-center font-black text-lg mb-1" style={{ fontFamily: "Outfit, sans-serif" }}>1</div>
-          <p className="font-bold text-slate-900 text-sm leading-tight">{duel.shooter1}</p>
+        <div className="flex-1 flex flex-col items-center text-center">
+          <ShooterAvatar src={duel.shooter1_img} name={duel.shooter1} badge="1" />
+          <p className="font-bold text-slate-900 text-sm leading-tight mt-2">{duel.shooter1}</p>
         </div>
         <div className="text-slate-300 font-black text-sm" style={{ fontFamily: "Outfit, sans-serif" }}>VS</div>
-        <div className="flex-1 text-center">
-          <div className="w-11 h-11 mx-auto rounded-full bg-[#0F172A] text-white flex items-center justify-center font-black text-lg mb-1" style={{ fontFamily: "Outfit, sans-serif" }}>2</div>
-          <p className="font-bold text-slate-900 text-sm leading-tight">{duel.shooter2}</p>
+        <div className="flex-1 flex flex-col items-center text-center">
+          <ShooterAvatar src={duel.shooter2_img} name={duel.shooter2} badge="2" />
+          <p className="font-bold text-slate-900 text-sm leading-tight mt-2">{duel.shooter2}</p>
         </div>
       </div>
 
@@ -85,6 +86,10 @@ export const DuelCard = ({ duel, myPick, onTipped }) => {
         <PickButton label="2" sub={duel.shooter2.split(" ")[0]} count={`${tc["2"]} tips`} active={pick === "2"} onClick={() => handlePick("2")} testid={`tip-2-${duel.id}`} />
       </div>
       {pick && <p className="text-center text-xs text-[#16A34A] font-semibold mt-3" data-testid={`my-pick-${duel.id}`}>Ditt tips er registrert{saving ? "..." : ""}</p>}
+
+      <Link to={`/duell/${duel.id}`} data-testid={`detail-link-${duel.id}`} className="mt-3 flex items-center justify-center gap-1 text-xs font-semibold text-slate-500 hover:text-[#D92525] transition-colors">
+        Se detaljer & fordeling <ChevronRight size={13} />
+      </Link>
     </div>
   );
 };

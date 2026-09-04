@@ -83,6 +83,8 @@ class LoginInput(BaseModel):
 class DuelCreate(BaseModel):
     shooter1: str
     shooter2: str
+    shooter1_img: Optional[str] = ""
+    shooter2_img: Optional[str] = ""
     discipline: str
     venue: Optional[str] = ""
     start_time: Optional[str] = ""
@@ -144,6 +146,8 @@ def duel_to_public(d: dict) -> dict:
         "id": str(d["_id"]),
         "shooter1": d["shooter1"],
         "shooter2": d["shooter2"],
+        "shooter1_img": d.get("shooter1_img", ""),
+        "shooter2_img": d.get("shooter2_img", ""),
         "discipline": d["discipline"],
         "venue": d.get("venue", ""),
         "start_time": d.get("start_time", ""),
@@ -201,6 +205,14 @@ async def list_duels(status: Optional[str] = None):
         query["status"] = status
     duels = await db.duels.find(query).sort("created_at", -1).to_list(500)
     return [duel_to_public(d) for d in duels]
+
+
+@api_router.get("/duels/{duel_id}")
+async def get_duel(duel_id: str):
+    duel = await db.duels.find_one({"_id": oid(duel_id)})
+    if not duel:
+        raise HTTPException(status_code=404, detail="Duell ikke funnet")
+    return duel_to_public(duel)
 
 
 @api_router.post("/duels")

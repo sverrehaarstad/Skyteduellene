@@ -10,6 +10,7 @@ import MyTips from "@/pages/MyTips";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import Admin from "@/pages/Admin";
+import DuelDetail from "@/pages/DuelDetail";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
               <Route path="/mine-tips" element={<MyTips />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/duell/:id" element={<DuelDetail />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="*" element={<Duels />} />
             </Routes>

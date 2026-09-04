@@ -10,7 +10,7 @@ const DISCIPLINES = ["10m Luftrifle", "50m Match", "300m Standardrifle", "Biathl
 export default function Admin() {
   const { user } = useAuth();
   const [duels, setDuels] = useState([]);
-  const [form, setForm] = useState({ shooter1: "", shooter2: "", discipline: DISCIPLINES[0], venue: "", start_time: "" });
+  const [form, setForm] = useState({ shooter1: "", shooter2: "", shooter1_img: "", shooter2_img: "", discipline: DISCIPLINES[0], venue: "", start_time: "" });
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
@@ -30,7 +30,7 @@ export default function Admin() {
     try {
       await api.post("/duels", form);
       toast.success("Duell opprettet!");
-      setForm({ shooter1: "", shooter2: "", discipline: DISCIPLINES[0], venue: "", start_time: "" });
+      setForm({ shooter1: "", shooter2: "", shooter1_img: "", shooter2_img: "", discipline: DISCIPLINES[0], venue: "", start_time: "" });
       load();
     } catch (err) {
       toast.error(formatApiError(err.response?.data?.detail));
@@ -60,11 +60,15 @@ export default function Admin() {
             <label className="text-sm font-semibold text-slate-700">Skytter 1</label>
             <input data-testid="duel-shooter1" required value={form.shooter1} onChange={(e) => setForm({ ...form, shooter1: e.target.value })}
               className="mt-1 w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]" />
+            <input data-testid="duel-shooter1-img" value={form.shooter1_img} onChange={(e) => setForm({ ...form, shooter1_img: e.target.value })} placeholder="Bilde-URL (fra LSres) – valgfritt"
+              className="mt-2 w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#D92525]" />
           </div>
           <div>
             <label className="text-sm font-semibold text-slate-700">Skytter 2</label>
             <input data-testid="duel-shooter2" required value={form.shooter2} onChange={(e) => setForm({ ...form, shooter2: e.target.value })}
               className="mt-1 w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]" />
+            <input data-testid="duel-shooter2-img" value={form.shooter2_img} onChange={(e) => setForm({ ...form, shooter2_img: e.target.value })} placeholder="Bilde-URL (fra LSres) – valgfritt"
+              className="mt-2 w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#D92525]" />
           </div>
           <div>
             <label className="text-sm font-semibold text-slate-700">Disiplin</label>

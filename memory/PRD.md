@@ -27,12 +27,11 @@ Norwegian website to tip on duels between two rifle shooters. Users pick nr 1, u
 
 ## Implemented (2026-06)
 - Auth: register/login/me, seeded admin (admin@riffeltippen.no).
-- Duels: list (open/finished), create (admin), delete (admin), result registration with point re-evaluation.
+- Duels: list (open/finished), create (admin, incl. optional shooter image URLs), delete (admin), result registration with point re-evaluation, GET single duel.
+- Duel detail page (/duell/:id): shooter avatars (photo from URL or placeholder), scores/winner when finished, tipping controls, and tip distribution % bars.
 - Tips: place/change tip, per-outcome tip counts, my-tips with correct/feil/venter status.
 - Leaderboard with accuracy %.
 - Full Norwegian UI, white+red design, responsive (desktop+mobile verified).
-- Invalid ObjectId returns 404; /mine-tips auth-guarded; 404 catch-all route.
-- Tested: 27/29 backend pytest, 12/12 frontend flows.
 
 ## Backlog (P1/P2)
 - P1: Login brute-force lockout (playbook item, deferred for demo).

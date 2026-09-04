@@ -10,7 +10,7 @@ const StatusBadge = ({ t }) => {
   if (t.duel.status !== "finished")
     return <span className="flex items-center gap-1 text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full"><Clock size={12} /> Venter</span>;
   if (t.correct)
-    return <span className="flex items-center gap-1 text-xs font-semibold text-[#16A34A] bg-green-50 px-2.5 py-1 rounded-full"><Check size={12} /> Riktig +3</span>;
+    return <span className="flex items-center gap-1 text-xs font-semibold text-[#16A34A] bg-green-50 px-2.5 py-1 rounded-full"><Check size={12} /> Riktig +1</span>;
   return <span className="flex items-center gap-1 text-xs font-semibold text-[#D92525] bg-[#FEF2F2] px-2.5 py-1 rounded-full"><X size={12} /> Feil</span>;
 };
 

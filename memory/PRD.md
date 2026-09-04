@@ -26,12 +26,15 @@ Norwegian website to tip on duels between two rifle shooters. Users pick nr 1, u
 - Leaderboard by points then correct tips.
 
 ## Implemented (2026-06)
-- Auth: register/login/me, seeded admin (admin@riffeltippen.no).
-- Duels: list (open/finished), create (admin, incl. optional shooter image URLs), delete (admin), result registration with point re-evaluation, GET single duel.
-- Duel detail page (/duell/:id): shooter avatars (photo from URL or placeholder), scores/winner when finished, tipping controls, and tip distribution % bars.
-- Tips: place/change tip, per-outcome tip counts, my-tips with correct/feil/venter status.
-- Leaderboard with accuracy %.
-- Full Norwegian UI, white+red design, responsive (desktop+mobile verified).
+- Auth: register/login/me, seeded admin (admin@riffeltippen.no). Scoring: 1 poeng per riktig tips.
+- Duels: list (open/finished, by tournament), create (admin, incl. shooter image URLs + season), delete, result registration with point re-evaluation, GET single duel.
+- Duel detail page (/duell/:id): shooter avatars + clickable names, scores/winner, tipping, tip distribution % bars, season link, Del-lenke (share/copy).
+- Serier/Sesonger: admin creates seasons and assigns duels; /serier list + /serie/:id detail with sesongtabell (tippere ranked by points) and Totalvinner (kåres når alle dueller avgjort).
+- Skytterprofil (/skytter/:name): shooter image, W/D/L record, all duels.
+- Tips: place/change tip, per-outcome counts, my-tips with correct/feil/venter status.
+- Global leaderboard with accuracy %.
+- Full Norwegian UI, white+red design, responsive. Demo duels seeded with shooter images.
+- Tested: iter1 27/29 backend + 12/12 FE; iter2 44/45 backend + 9/9 FE (1 known gap: brute-force lockout).
 
 ## Backlog (P1/P2)
 - P1: Login brute-force lockout (playbook item, deferred for demo).

@@ -241,7 +241,7 @@ class TestTipsAndResults:
         assert d["status"] == "finished" and d["outcome"] == "X" and d["score1"] == "98"
 
         after = requests.get(f"{API}/auth/me", headers=user_headers, timeout=30).json()["points"]
-        assert after == before + 3, f"expected +3 points, got {before}->{after}"
+        assert after == before + 1, f"expected +1 point (POINTS_PER_CORRECT=1), got {before}->{after}"
 
         mine = requests.get(f"{API}/my-tips", headers=user_headers, timeout=30).json()
         entry = [t for t in mine if t["duel"]["id"] == duel_id][0]
@@ -272,7 +272,7 @@ class TestTipsAndResults:
                           json={"outcome": "2", "score1": "95", "score2": "99"}, timeout=30)
         assert r.status_code == 200
         after = requests.get(f"{API}/auth/me", headers=user_headers, timeout=30).json()["points"]
-        assert after == before - 3, f"points should be reversed: {before}->{after}"
+        assert after == before - 1, f"points should be reversed: {before}->{after}"
 
 
 # ---------- Edge cases ----------

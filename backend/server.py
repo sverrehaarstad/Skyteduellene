@@ -22,7 +22,7 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 JWT_ALGORITHM = "HS256"
-POINTS_PER_CORRECT = 3
+POINTS_PER_CORRECT = 1
 
 # ---------- Helpers ----------
 PyObjectId = Annotated[str, BeforeValidator(str)]
@@ -88,6 +88,12 @@ class DuelCreate(BaseModel):
     discipline: str
     venue: Optional[str] = ""
     start_time: Optional[str] = ""
+    tournament_id: Optional[str] = ""
+
+
+class TournamentCreate(BaseModel):
+    name: str
+    season: Optional[str] = ""
 
 
 class ResultInput(BaseModel):
@@ -156,7 +162,18 @@ def duel_to_public(d: dict) -> dict:
         "score1": d.get("score1", ""),
         "score2": d.get("score2", ""),
         "tip_counts": d.get("tip_counts", {"1": 0, "X": 0, "2": 0}),
+        "tournament_id": d.get("tournament_id", ""),
+        "tournament_name": d.get("tournament_name", ""),
         "created_at": d.get("created_at").isoformat() if d.get("created_at") else "",
+    }
+
+
+def tournament_to_public(t: dict) -> dict:
+    return {
+        "id": str(t["_id"]),
+        "name": t["name"],
+        "season": t.get("season", ""),
+        "created_at": t.get("created_at").isoformat() if t.get("created_at") else "",
     }
 
 
@@ -199,10 +216,12 @@ async def me(user: dict = Depends(get_current_user)):
 
 # ---------- Duel routes ----------
 @api_router.get("/duels")
-async def list_duels(status: Optional[str] = None):
+async def list_duels(status: Optional[str] = None, tournament_id: Optional[str] = None):
     query = {}
     if status:
         query["status"] = status
+    if tournament_id:
+        query["tournament_id"] = tournament_id
     duels = await db.duels.find(query).sort("created_at", -1).to_list(500)
     return [duel_to_public(d) for d in duels]
 
@@ -217,8 +236,14 @@ async def get_duel(duel_id: str):
 
 @api_router.post("/duels")
 async def create_duel(data: DuelCreate, admin: dict = Depends(require_admin)):
+    payload = data.model_dump()
+    tournament_name = ""
+    if payload.get("tournament_id"):
+        t = await db.tournaments.find_one({"_id": oid(payload["tournament_id"])})
+        tournament_name = t["name"] if t else ""
     doc = {
-        **data.model_dump(),
+        **payload,
+        "tournament_name": tournament_name,
         "status": "open",
         "outcome": None,
         "score1": "",
@@ -330,6 +355,111 @@ async def leaderboard():
         })
     rows.sort(key=lambda r: (r["points"], r["correct"]), reverse=True)
     return rows
+
+
+# ---------- Tournaments (Serier / Sesonger) ----------
+@api_router.get("/tournaments")
+async def list_tournaments():
+    tours = await db.tournaments.find().sort("created_at", -1).to_list(200)
+    out = []
+    for t in tours:
+        tid = str(t["_id"])
+        duel_count = await db.duels.count_documents({"tournament_id": tid})
+        pub = tournament_to_public(t)
+        pub["duel_count"] = duel_count
+        out.append(pub)
+    return out
+
+
+@api_router.post("/tournaments")
+async def create_tournament(data: TournamentCreate, admin: dict = Depends(require_admin)):
+    doc = {"name": data.name, "season": data.season or "", "created_at": now_utc()}
+    res = await db.tournaments.insert_one(doc)
+    doc["_id"] = res.inserted_id
+    return tournament_to_public(doc)
+
+
+@api_router.delete("/tournaments/{tid}")
+async def delete_tournament(tid: str, admin: dict = Depends(require_admin)):
+    await db.tournaments.delete_one({"_id": oid(tid)})
+    await db.duels.update_many({"tournament_id": tid}, {"$set": {"tournament_id": "", "tournament_name": ""}})
+    return {"ok": True}
+
+
+@api_router.get("/tournaments/{tid}")
+async def tournament_detail(tid: str):
+    t = await db.tournaments.find_one({"_id": oid(tid)})
+    if not t:
+        raise HTTPException(status_code=404, detail="Sesong ikke funnet")
+    duels = await db.duels.find({"tournament_id": tid}).sort("created_at", -1).to_list(500)
+    duel_ids = [str(d["_id"]) for d in duels]
+
+    # Standings: tippers ranked by points earned on this season's duels
+    standings = {}
+    if duel_ids:
+        tips = await db.tips.find({"duel_id": {"$in": duel_ids}}).to_list(5000)
+        for tip in tips:
+            uid = tip["user_id"]
+            if uid not in standings:
+                standings[uid] = {"correct": 0, "total": 0}
+            standings[uid]["total"] += 1
+            if tip.get("correct"):
+                standings[uid]["correct"] += 1
+
+    rows = []
+    for uid, s in standings.items():
+        u = await db.users.find_one({"_id": ObjectId(uid)})
+        if not u or u.get("role") == "admin":
+            continue
+        rows.append({
+            "id": uid,
+            "name": u["name"],
+            "points": s["correct"] * POINTS_PER_CORRECT,
+            "correct": s["correct"],
+            "total_tips": s["total"],
+            "accuracy": round((s["correct"] / s["total"] * 100), 1) if s["total"] else 0.0,
+        })
+    rows.sort(key=lambda r: (r["points"], r["correct"]), reverse=True)
+
+    finished = sum(1 for d in duels if d.get("status") == "finished")
+    return {
+        "tournament": tournament_to_public(t),
+        "duels": [duel_to_public(d) for d in duels],
+        "standings": rows,
+        "winner": rows[0] if rows and rows[0]["points"] > 0 and finished == len(duels) and len(duels) > 0 else None,
+        "finished_count": finished,
+        "duel_count": len(duels),
+    }
+
+
+# ---------- Shooter profile ----------
+@api_router.get("/shooters/{name}")
+async def shooter_profile(name: str):
+    duels = await db.duels.find({"$or": [{"shooter1": name}, {"shooter2": name}]}).sort("created_at", -1).to_list(500)
+    image = ""
+    wins = losses = draws = 0
+    for d in duels:
+        is_s1 = d["shooter1"] == name
+        if not image:
+            img = d.get("shooter1_img") if is_s1 else d.get("shooter2_img")
+            if img:
+                image = img
+        if d.get("status") == "finished":
+            oc = d.get("outcome")
+            if oc == "X":
+                draws += 1
+            elif (oc == "1" and is_s1) or (oc == "2" and not is_s1):
+                wins += 1
+            else:
+                losses += 1
+    return {
+        "name": name,
+        "image": image,
+        "record": {"wins": wins, "losses": losses, "draws": draws},
+        "duels": [duel_to_public(d) for d in duels],
+    }
+
+
 
 
 app.include_router(api_router)

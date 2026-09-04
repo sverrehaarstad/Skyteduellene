@@ -4,7 +4,7 @@ import api, { formatApiError } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { ShooterAvatar } from "@/components/ShooterAvatar";
 import { toast } from "sonner";
-import { ArrowLeft, MapPin, Clock, BarChart3, Check } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, BarChart3, Check, Share2, Trophy } from "lucide-react";
 
 const outcomeLabel = (d) =>
   d.outcome === "1" ? d.shooter1 : d.outcome === "2" ? d.shooter2 : "Uavgjort";
@@ -71,9 +71,12 @@ export default function DuelDetail() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6" data-testid="duel-detail">
-      <button onClick={() => navigate(-1)} data-testid="back-btn" className="flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-900 mb-5">
-        <ArrowLeft size={16} /> Tilbake
-      </button>
+      <div className="flex items-center justify-between mb-5">
+        <button onClick={() => navigate(-1)} data-testid="back-btn" className="flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-900">
+          <ArrowLeft size={16} /> Tilbake
+        </button>
+        <ShareButton duel={duel} />
+      </div>
 
       <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8">
         <div className="flex items-center justify-between mb-6">
@@ -83,16 +86,22 @@ export default function DuelDetail() {
           </span>
         </div>
 
+        {duel.tournament_id && (
+          <Link to={`/serie/${duel.tournament_id}`} data-testid="detail-tournament-link" className="flex items-center justify-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-[#D92525] transition-colors mb-4 -mt-2">
+            <Trophy size={14} className="text-[#EAB308]" /> {duel.tournament_name}
+          </Link>
+        )}
+
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 flex flex-col items-center text-center">
             <ShooterAvatar src={duel.shooter1_img} name={duel.shooter1} badge="1" size="lg" />
-            <p className="font-bold text-slate-900 mt-3">{duel.shooter1}</p>
+            <Link to={`/skytter/${encodeURIComponent(duel.shooter1)}`} data-testid="shooter1-link" className="font-bold text-slate-900 mt-3 hover:text-[#D92525] transition-colors">{duel.shooter1}</Link>
             {!isOpen && <p className="font-mono text-2xl text-slate-900 mt-1">{duel.score1 || "-"}</p>}
           </div>
           <div className="text-slate-300 font-black text-lg" style={{ fontFamily: "Outfit, sans-serif" }}>VS</div>
           <div className="flex-1 flex flex-col items-center text-center">
             <ShooterAvatar src={duel.shooter2_img} name={duel.shooter2} badge="2" size="lg" />
-            <p className="font-bold text-slate-900 mt-3">{duel.shooter2}</p>
+            <Link to={`/skytter/${encodeURIComponent(duel.shooter2)}`} data-testid="shooter2-link" className="font-bold text-slate-900 mt-3 hover:text-[#D92525] transition-colors">{duel.shooter2}</Link>
             {!isOpen && <p className="font-mono text-2xl text-slate-900 mt-1">{duel.score2 || "-"}</p>}
           </div>
         </div>
@@ -148,5 +157,27 @@ export default function DuelDetail() {
         </div>
       </div>
     </div>
+  );
+}
+
+
+function ShareButton({ duel }) {
+  const share = async () => {
+    const url = window.location.href;
+    const title = `${duel.shooter1} vs ${duel.shooter2} – Riffeltippen`;
+    if (navigator.share) {
+      try { await navigator.share({ title, text: "Tipp på denne duellen!", url }); return; } catch { /* cancelled */ }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Lenke kopiert – del den med venner!");
+    } catch {
+      toast.error("Kunne ikke kopiere lenken");
+    }
+  };
+  return (
+    <button onClick={share} data-testid="share-btn" className="flex items-center gap-1.5 text-sm font-semibold text-white bg-[#D92525] hover:bg-[#B91C1C] px-3 py-1.5 rounded-lg transition-colors">
+      <Share2 size={15} /> Del
+    </button>
   );
 }

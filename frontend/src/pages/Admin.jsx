@@ -3,19 +3,22 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import api, { formatApiError } from "@/lib/api";
 import { toast } from "sonner";
-import { Shield, Plus, Trash2, Flag } from "lucide-react";
+import { Shield, Plus, Trash2, Flag, Trophy } from "lucide-react";
 
 const DISCIPLINES = ["10m Luftrifle", "50m Match", "300m Standardrifle", "Biathlon Sprint", "Felthurtig"];
 
 export default function Admin() {
   const { user } = useAuth();
   const [duels, setDuels] = useState([]);
-  const [form, setForm] = useState({ shooter1: "", shooter2: "", shooter1_img: "", shooter2_img: "", discipline: DISCIPLINES[0], venue: "", start_time: "" });
+  const [tournaments, setTournaments] = useState([]);
+  const [form, setForm] = useState({ shooter1: "", shooter2: "", shooter1_img: "", shooter2_img: "", discipline: DISCIPLINES[0], venue: "", start_time: "", tournament_id: "" });
+  const [seasonForm, setSeasonForm] = useState({ name: "", season: "" });
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const { data } = await api.get("/duels");
-    setDuels(data);
+    const [d, t] = await Promise.all([api.get("/duels"), api.get("/tournaments")]);
+    setDuels(d.data);
+    setTournaments(t.data);
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -30,13 +33,32 @@ export default function Admin() {
     try {
       await api.post("/duels", form);
       toast.success("Duell opprettet!");
-      setForm({ shooter1: "", shooter2: "", shooter1_img: "", shooter2_img: "", discipline: DISCIPLINES[0], venue: "", start_time: "" });
+      setForm({ shooter1: "", shooter2: "", shooter1_img: "", shooter2_img: "", discipline: DISCIPLINES[0], venue: "", start_time: "", tournament_id: "" });
       load();
     } catch (err) {
       toast.error(formatApiError(err.response?.data?.detail));
     } finally {
       setBusy(false);
     }
+  };
+
+  const createSeason = async (e) => {
+    e.preventDefault();
+    if (!seasonForm.name) return;
+    try {
+      await api.post("/tournaments", seasonForm);
+      toast.success("Sesong opprettet!");
+      setSeasonForm({ name: "", season: "" });
+      load();
+    } catch (err) {
+      toast.error(formatApiError(err.response?.data?.detail));
+    }
+  };
+
+  const removeSeason = async (id) => {
+    await api.delete(`/tournaments/${id}`);
+    toast.success("Sesong slettet");
+    load();
   };
 
   const removeDuel = async (id) => {
@@ -89,6 +111,14 @@ export default function Admin() {
                 className="mt-1 w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]" />
             </div>
           </div>
+          <div>
+            <label className="text-sm font-semibold text-slate-700">Serie / Sesong</label>
+            <select data-testid="duel-tournament" value={form.tournament_id} onChange={(e) => setForm({ ...form, tournament_id: e.target.value })}
+              className="mt-1 w-full px-3 py-2 border border-slate-200 rounded-lg bg-white focus:outline-none focus:border-[#D92525]">
+              <option value="">Ingen serie</option>
+              {tournaments.map((t) => <option key={t.id} value={t.id}>{t.name}{t.season ? ` (${t.season})` : ""}</option>)}
+            </select>
+          </div>
           <button data-testid="submit-duel" disabled={busy} className="w-full py-2.5 bg-[#D92525] hover:bg-[#B91C1C] text-white font-bold rounded-lg transition-colors disabled:opacity-60">
             {busy ? "Oppretter..." : "Opprett duell"}
           </button>
@@ -96,7 +126,33 @@ export default function Admin() {
 
         {/* Duel list with result entry */}
         <div className="lg:col-span-3 space-y-3">
-          <h2 className="font-bold text-slate-900">Alle dueller ({duels.length})</h2>
+          {/* Season management */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6">
+            <h2 className="font-bold text-slate-900 flex items-center gap-2 mb-4"><Trophy size={18} className="text-[#EAB308]" /> Serier / Sesonger</h2>
+            <form onSubmit={createSeason} className="flex flex-col sm:flex-row gap-2 mb-4" data-testid="create-season-form">
+              <input data-testid="season-name" required value={seasonForm.name} onChange={(e) => setSeasonForm({ ...seasonForm, name: e.target.value })} placeholder="Navn (f.eks. Vintercupen)"
+                className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]" />
+              <input data-testid="season-period" value={seasonForm.season} onChange={(e) => setSeasonForm({ ...seasonForm, season: e.target.value })} placeholder="Sesong (f.eks. 2026)"
+                className="w-full sm:w-40 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]" />
+              <button data-testid="submit-season" className="px-4 py-2 bg-[#0F172A] hover:bg-slate-800 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5">
+                <Plus size={16} /> Legg til
+              </button>
+            </form>
+            {tournaments.length === 0 ? (
+              <p className="text-slate-500 text-sm">Ingen serier ennå.</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {tournaments.map((t) => (
+                  <span key={t.id} className="flex items-center gap-2 bg-slate-100 rounded-full pl-3 pr-1.5 py-1 text-sm font-semibold text-slate-700" data-testid={`admin-season-${t.id}`}>
+                    {t.name}{t.season ? ` · ${t.season}` : ""} <span className="text-xs text-slate-400">({t.duel_count})</span>
+                    <button onClick={() => removeSeason(t.id)} data-testid={`delete-season-${t.id}`} className="p-1 text-slate-400 hover:text-[#D92525] rounded-full"><Trash2 size={13} /></button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <h2 className="font-bold text-slate-900 pt-2">Alle dueller ({duels.length})</h2>
           {duels.length === 0 && <p className="text-slate-500 text-sm">Ingen dueller opprettet ennå.</p>}
           {duels.map((d) => (
             <AdminDuelRow key={d.id} duel={d} onChanged={load} onRemove={() => removeDuel(d.id)} />

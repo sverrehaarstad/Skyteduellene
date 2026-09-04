@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Target } from "@/components/Target";
-import { Crosshair, LogOut, Trophy, ListChecks, Swords, ClipboardList, Shield } from "lucide-react";
+import { Crosshair, LogOut, Trophy, ListChecks, Swords, ClipboardList, Shield, Medal } from "lucide-react";
 
 const NavLink = ({ to, children, active, testid }) => (
   <Link
@@ -23,6 +23,7 @@ export const Navbar = () => {
   const links = [
     { to: "/", label: "Dueller", icon: Swords, testid: "nav-duels" },
     { to: "/resultater", label: "Resultater", icon: ListChecks, testid: "nav-results" },
+    { to: "/serier", label: "Serier", icon: Medal, testid: "nav-tournaments" },
     { to: "/lederboard", label: "Lederboard", icon: Trophy, testid: "nav-leaderboard" },
   ];
   if (user) links.push({ to: "/mine-tips", label: "Mine Tips", icon: ClipboardList, testid: "nav-mytips" });

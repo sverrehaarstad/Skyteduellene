@@ -11,6 +11,9 @@ import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import Admin from "@/pages/Admin";
 import DuelDetail from "@/pages/DuelDetail";
+import ShooterProfile from "@/pages/ShooterProfile";
+import Tournaments from "@/pages/Tournaments";
+import TournamentDetail from "@/pages/TournamentDetail";
 
 function App() {
   return (
@@ -27,6 +30,9 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/duell/:id" element={<DuelDetail />} />
+              <Route path="/skytter/:name" element={<ShooterProfile />} />
+              <Route path="/serier" element={<Tournaments />} />
+              <Route path="/serie/:id" element={<TournamentDetail />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="*" element={<Duels />} />
             </Routes>

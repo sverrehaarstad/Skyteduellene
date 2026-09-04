@@ -1,0 +1,51 @@
+{
+  "summary": "Iteration 2 testing of Riffeltippen new features (tournaments/seasons, season standings, shooter profiles, share link, 1-point scoring) + regression. Backend: 45 pytest cases across /app/backend/tests/ (16 new in test_tournaments.py) - 44 passed, 1 failed (known brute-force lockout gap). Frontend: full E2E on public preview URL - admin created season via create-season-form -> chip + duel-tournament dropdown + /serier list + /serie/:id detail; duel assigned to season shows season badge on card & detail-tournament-link; fresh user tipped correctly, admin set result -> user points pill = 1, MyTips 'Riktig +1', season standings ts-row-0 = 1/1 100% 1p and Totalvinner appeared only after all season duels were finished (verified backend that winner is null with 1 of 2 finished); shooter profile via card and detail links shows avatar, W/D/L record (1-0-0 after result) and duel list linking back to duel detail; share-btn copied the exact duel URL to clipboard with 'Lenke kopiert' toast. Regression (register, login/logout, tips, results, leaderboard, admin panel) all green. All test data cleaned up: DB back to 3 seeded duels + admin, 0 tips, 0 tournaments.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/auth/login", "issue": "No brute-force protection: 6 consecutive wrong passwords all return 401, no 429/lockout (playbook expects lockout after 5 fails). Still open from iteration 1."},
+      {"endpoint": "GET /api/tournaments/{id}", "issue": "Standings loop does one db.users.find_one per tipper (N+1); GET /api/leaderboard still does 2 count_documents per user. Fine at demo scale, will not scale."},
+      {"endpoint": "DELETE /api/tournaments/{id}", "issue": "Returns {ok:true} even for a non-existent (but valid) ObjectId; consider 404."},
+      {"endpoint": "auth", "issue": "Bearer-token-in-localStorage design (no httpOnly Set-Cookie on login). Flag only - stated design. Admin hash verified as $2b$ bcrypt and seed_admin re-hashes when ADMIN_PASSWORD changes."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "DuelCard shooter names", "issue": "Shooter name links to /skytter/:name had no data-testid; added card-shooter1-{id} / card-shooter2-{id} (fixed by tester).", "selector": "[data-testid^=\"card-shooter1-\"]", "priority": "LOW"},
+      {"component": "Tournaments.jsx / TournamentDetail.jsx", "issue": "Norwegian pluralisation bug: shows '1 dueller' and '1 av 1 dueller avgjort' - singular should be 'duell'.", "selector": "[data-testid^=\"tournament-\"]", "priority": "LOW"},
+      {"component": "Seed data / ShooterAvatar", "issue": "All 3 seeded demo duels have shooter1_img/shooter2_img = null, so shooter profile pages for demo shooters show only the grey placeholder avatar - the new 'shooter image' feature is invisible with default data. Add image URLs to the seeded duels.", "selector": "[data-testid=\"shooter-profile\"] img", "priority": "MEDIUM"},
+      {"component": "TournamentDetail / ShooterProfile loading", "issue": "Both show plain 'Laster...' with no skeleton; TournamentDetail correctly falls back to 'Fant ikke serien.' for invalid ids (verified /serie/deadbeef).", "selector": "[data-testid=\"tournament-detail\"]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "TournamentDetail header (dark card)", "issues": ["'Totalvinner kåres når alle duellene er avgjort.' uses text-slate-400 on #0F172A (~4.0:1) - borderline for small text; use slate-300."]},
+      {"screen": "Shooter profile stats", "issues": ["Stat labels (Seiere/Uavgjort/Tap) use text-slate-400 on white (~2.6:1) - below WCAG AA. Same low-contrast pattern flagged in iteration 1 for duel card sub-labels."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_tournaments.py", "/app/backend/tests/backend_test.py", "/app/backend/tests/cleanup_test_data.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Add login rate limiting/lockout after 5 failed attempts (only failing backend test)",
+    "Add shooter images to the 3 seeded demo duels so shooter profiles show real photos",
+    "Fix Norwegian singular/plural: '1 duell' vs '2 dueller' on /serier and season header",
+    "Optional: 404 for DELETE /api/tournaments on unknown id; aggregation to remove N+1 in standings/leaderboard; raise contrast of slate-400 labels"
+  ],
+  "critical_code_review_comments": [
+    "tournament_detail(): winner condition (rows[0].points>0 and finished==len(duels)) is correct, but ties are resolved silently by dict/sort order - two tippers with identical points/correct will arbitrarily produce one 'Totalvinner'. Consider showing shared winners.",
+    "tournament_detail() re-queries db.users per tipper inside the loop; batch with $in.",
+    "create_duel() stores a denormalised tournament_name; renaming a tournament will leave stale names on duels (no update path). DELETE tournament does clear them correctly (verified).",
+    "shooter profile is name-string based (no shooter collection), so a typo in an admin-entered name silently creates a separate profile; also image is taken from the first duel that has one."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_tournaments.py (new, 16 tests)",
+    "/app/backend/tests/backend_test.py (updated stale +3 point assertions to +1)",
+    "/app/backend/tests/cleanup_test_data.py (also purges TEST_/QA tournaments and TEST_ duels by either shooter)",
+    "/app/frontend/src/components/DuelCard.jsx (added data-testid to shooter profile links)"
+  ],
+  "success_rate": {"backend": "98% (44/45)", "frontend": "100% of requested flows (9/9)"},
+  "seed_data_creation": "Created TEST_QA Cup season, one TEST_ duel in it, and TEST_/tester_ users; all removed afterwards via cleanup_test_data.py (DB now: 3 demo duels, 1 admin user, 0 tips, 0 tournaments).",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "admin@riffeltippen.no / Skyting2026! (works). Test users created fresh via /register and deleted.",
+  "context_for_next_testing_agent": "Regression: `cd /app/backend && python -m pytest tests/ -q` (pytest.ini already adds xdist; do not pass -n). Only known failure = TestEdgeCases::test_brute_force_lockout (real product gap). New feature coverage lives in tests/test_tournaments.py (tournament CRUD/authz, duel_count, name propagation, delete-detach, standings ranking, winner gating on finished_count, 1-point scoring + reversal, shooter record W/D/L, url-encoded names). Always run `python tests/cleanup_test_data.py` afterwards. Frontend flows all verified green in iteration 2; DuelCard shooter links now have card-shooter1-{id}/card-shooter2-{id} testids.",
+  "rca_of_the_issue": "No functional defect found in the new features. Only notable data gap: seeded duels have null shooter images (backend startup seeds nothing for images), so ShooterAvatar renders the placeholder on demo shooter profiles."
+}

@@ -30,5 +30,33 @@ def create_duell():
     data = request.json
     return jsonify({"success": True, "duell": data}), 201
 
+@app.route('/register', methods=['POST', 'OPTIONS'])
+def register():
+    if request.method == 'OPTIONS':
+        return '', 204
+    
+    data = request.json
+    
+    # Validering
+    if not data.get('username') or len(data.get('username', '')) < 1:
+        return jsonify({"error": "Brukernavn er påkrevd"}), 400
+    
+    if not data.get('email') or '@' not in data.get('email', ''):
+        return jsonify({"error": "Gyldig e-post er påkrevd"}), 400
+    
+    if not data.get('password') or len(data.get('password', '')) < 6:
+        return jsonify({"error": "Passord må være minst 6 tegn"}), 400
+    
+    # TODO: Lagre bruker i database
+    return jsonify({
+        "success": True, 
+        "message": "Bruker opprettet!",
+        "user": {
+            "id": 1,
+            "username": data.get('username'),
+            "email": data.get('email')
+        }
+    }), 201
+
 if __name__ == '__main__':
     app.run(debug=False)

@@ -5,7 +5,7 @@ import os
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-from fastapi import FastAPI, APIRouter, HTTPException, Request, Depends
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Depends, UploadFile, File, Response, Header, Query
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, EmailStr, BeforeValidator, ConfigDict
@@ -18,6 +18,7 @@ import jwt
 import secrets
 import asyncio
 import requests
+import uuid
 
 # ---------- DB ----------
 mongo_url = os.environ['MONGO_URL']
@@ -26,6 +27,51 @@ db = client[os.environ['DB_NAME']]
 
 JWT_ALGORITHM = "HS256"
 POINTS_PER_CORRECT = 1
+
+# ---------- Object storage ----------
+STORAGE_BASE = (os.environ.get("INTEGRATION_PROXY_URL") or "").strip() or "https://integrations.emergentagent.com"
+STORAGE_URL = STORAGE_BASE.rstrip("/") + "/objstore/api/v1/storage"
+EMERGENT_KEY = os.environ.get("EMERGENT_LLM_KEY")
+APP_NAME = "skyteduellene"
+storage_key = None
+
+
+def init_storage(force: bool = False):
+    global storage_key
+    if storage_key and not force:
+        return storage_key
+    resp = requests.post(f"{STORAGE_URL}/init", json={"emergent_key": EMERGENT_KEY}, timeout=30)
+    resp.raise_for_status()
+    storage_key = resp.json()["storage_key"]
+    return storage_key
+
+
+def put_object(path: str, data: bytes, content_type: str) -> dict:
+    key = init_storage()
+    resp = requests.put(
+        f"{STORAGE_URL}/objects/{path}",
+        headers={"X-Storage-Key": key, "Content-Type": content_type},
+        data=data, timeout=120,
+    )
+    if resp.status_code == 404:
+        key = init_storage(force=True)
+        resp = requests.put(
+            f"{STORAGE_URL}/objects/{path}",
+            headers={"X-Storage-Key": key, "Content-Type": content_type},
+            data=data, timeout=120,
+        )
+    resp.raise_for_status()
+    return resp.json()
+
+
+def get_object(path: str):
+    key = init_storage()
+    resp = requests.get(f"{STORAGE_URL}/objects/{path}", headers={"X-Storage-Key": key}, timeout=60)
+    if resp.status_code == 404:
+        key = init_storage(force=True)
+        resp = requests.get(f"{STORAGE_URL}/objects/{path}", headers={"X-Storage-Key": key}, timeout=60)
+    resp.raise_for_status()
+    return resp.content, resp.headers.get("Content-Type", "application/octet-stream")
 
 # ---------- Helpers ----------
 PyObjectId = Annotated[str, BeforeValidator(str)]
@@ -161,6 +207,16 @@ class DuelCreate(BaseModel):
 class TournamentCreate(BaseModel):
     name: str
     season: Optional[str] = ""
+
+
+class DuelUpdate(BaseModel):
+    shooter1_img: Optional[str] = None
+    shooter2_img: Optional[str] = None
+    shooter1: Optional[str] = None
+    shooter2: Optional[str] = None
+    discipline: Optional[str] = None
+    venue: Optional[str] = None
+    start_at: Optional[str] = None
 
 
 class ResultInput(BaseModel):
@@ -407,9 +463,25 @@ async def create_duel(data: DuelCreate, admin: dict = Depends(require_admin)):
 
 @api_router.delete("/duels/{duel_id}")
 async def delete_duel(duel_id: str, admin: dict = Depends(require_admin)):
+    # Reclaim points awarded for correct tips on this duel before deleting
+    correct_tips = await db.tips.find({"duel_id": duel_id, "correct": True}).to_list(2000)
+    for t in correct_tips:
+        await db.users.update_one({"_id": ObjectId(t["user_id"])}, {"$inc": {"points": -POINTS_PER_CORRECT}})
     await db.duels.delete_one({"_id": oid(duel_id)})
     await db.tips.delete_many({"duel_id": duel_id})
     return {"ok": True}
+
+
+@api_router.patch("/duels/{duel_id}")
+async def update_duel(duel_id: str, data: DuelUpdate, admin: dict = Depends(require_admin)):
+    duel = await db.duels.find_one({"_id": oid(duel_id)})
+    if not duel:
+        raise HTTPException(status_code=404, detail="Duell ikke funnet")
+    updates = {k: v for k, v in data.model_dump().items() if v is not None}
+    if updates:
+        await db.duels.update_one({"_id": oid(duel_id)}, {"$set": updates})
+    updated = await db.duels.find_one({"_id": oid(duel_id)})
+    return duel_to_public(updated)
 
 
 @api_router.post("/duels/{duel_id}/result")
@@ -665,6 +737,49 @@ async def admin_set_role(user_id: str, data: RoleInput, admin: dict = Depends(re
 
 
 
+# ---------- File upload (shooter images) ----------
+MIME_TYPES = {"jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png", "gif": "image/gif", "webp": "image/webp"}
+
+
+@api_router.post("/upload")
+async def upload_image(file: UploadFile = File(...), admin: dict = Depends(require_admin)):
+    ext = (file.filename.rsplit(".", 1)[-1] if "." in file.filename else "png").lower()
+    if ext not in MIME_TYPES:
+        raise HTTPException(status_code=400, detail="Kun bildefiler er tillatt (png, jpg, webp, gif)")
+    content_type = file.content_type or MIME_TYPES[ext]
+    path = f"{APP_NAME}/shooters/{uuid.uuid4()}.{ext}"
+    data = await file.read()
+    if len(data) > 8 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Bildet er for stort (maks 8MB)")
+    try:
+        result = await asyncio.to_thread(put_object, path, data, content_type)
+    except Exception as e:
+        logger.error(f"Opplasting feilet: {e}")
+        raise HTTPException(status_code=502, detail="Kunne ikke laste opp bildet")
+    stored_path = result["path"]
+    await db.files.insert_one({
+        "storage_path": stored_path,
+        "content_type": content_type,
+        "original_filename": file.filename,
+        "created_at": now_utc(),
+    })
+    return {"url": f"/api/files/{stored_path}"}
+
+
+@api_router.get("/files/{path:path}")
+async def serve_file(path: str):
+    record = await db.files.find_one({"storage_path": path})
+    if not record:
+        raise HTTPException(status_code=404, detail="Fil ikke funnet")
+    try:
+        data, content_type = await asyncio.to_thread(get_object, path)
+    except Exception:
+        raise HTTPException(status_code=404, detail="Fil ikke funnet")
+    return Response(content=data, media_type=record.get("content_type", content_type),
+                    headers={"Cache-Control": "public, max-age=86400"})
+
+
+
 app.include_router(api_router)
 app.add_middleware(
     CORSMiddleware,
@@ -681,6 +796,11 @@ logger = logging.getLogger(__name__)
 @app.on_event("startup")
 async def startup():
     await db.users.create_index("email", unique=True)
+    try:
+        await asyncio.to_thread(init_storage)
+        logger.info("Object storage initialized")
+    except Exception as e:
+        logger.error(f"Storage init failed: {e}")
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@example.com").lower()
     admin_password = os.environ.get("ADMIN_PASSWORD", "admin123")
     existing = await db.users.find_one({"email": admin_email})

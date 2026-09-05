@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import api, { formatApiError } from "@/lib/api";
 import { toast } from "sonner";
 import { Shield, Plus, Trash2, Flag, Trophy, Image as ImageIcon, Users, Crown } from "lucide-react";
+import { ImageUpload } from "@/components/ImageUpload";
 
 const DISCIPLINES = ["100m", "200m", "300m", "15m", "50m", "Feltskyting", "Stangskyting", "Felthurtigskyting"];
 
@@ -15,6 +16,7 @@ export default function Admin() {
   const [heroInput, setHeroInput] = useState("");
   const [form, setForm] = useState({ shooter1: "", shooter2: "", shooter1_img: "", shooter2_img: "", discipline: DISCIPLINES[0], venue: "", start_time: "", start_at: "", tournament_id: "" });
   const [seasonForm, setSeasonForm] = useState({ name: "", season: "" });
+  const [duelTab, setDuelTab] = useState("active");
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
@@ -31,6 +33,10 @@ export default function Admin() {
 
   if (user === null) return null;
   if (!user || user.role !== "admin") return <Navigate to="/" replace />;
+
+  const activeDuels = duels.filter((d) => d.status !== "finished");
+  const finishedDuels = duels.filter((d) => d.status === "finished");
+  const shownDuels = duelTab === "active" ? activeDuels : finishedDuels;
 
   const saveHero = async (e) => {
     e.preventDefault();
@@ -109,15 +115,17 @@ export default function Admin() {
             <label className="text-sm font-semibold text-slate-700">Skytter 1</label>
             <input data-testid="duel-shooter1" required value={form.shooter1} onChange={(e) => setForm({ ...form, shooter1: e.target.value })}
               className="mt-1 w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]" />
-            <input data-testid="duel-shooter1-img" value={form.shooter1_img} onChange={(e) => setForm({ ...form, shooter1_img: e.target.value })} placeholder="Bilde-URL (fra LSres) – valgfritt"
-              className="mt-2 w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#D92525]" />
+            <div className="mt-2">
+              <ImageUpload value={form.shooter1_img} onChange={(url) => setForm({ ...form, shooter1_img: url })} testid="duel-shooter1-img" label="Last opp bilde av skytter 1" />
+            </div>
           </div>
           <div>
             <label className="text-sm font-semibold text-slate-700">Skytter 2</label>
             <input data-testid="duel-shooter2" required value={form.shooter2} onChange={(e) => setForm({ ...form, shooter2: e.target.value })}
               className="mt-1 w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]" />
-            <input data-testid="duel-shooter2-img" value={form.shooter2_img} onChange={(e) => setForm({ ...form, shooter2_img: e.target.value })} placeholder="Bilde-URL (fra LSres) – valgfritt"
-              className="mt-2 w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#D92525]" />
+            <div className="mt-2">
+              <ImageUpload value={form.shooter2_img} onChange={(url) => setForm({ ...form, shooter2_img: url })} testid="duel-shooter2-img" label="Last opp bilde av skytter 2" />
+            </div>
           </div>
           <div>
             <label className="text-sm font-semibold text-slate-700">Disiplin</label>
@@ -179,9 +187,22 @@ export default function Admin() {
             )}
           </div>
 
-          <h2 className="font-bold text-slate-900 pt-2">Alle dueller ({duels.length})</h2>
-          {duels.length === 0 && <p className="text-slate-500 text-sm">Ingen dueller opprettet ennå.</p>}
-          {duels.map((d) => (
+          <div className="flex items-center gap-2 pt-2">
+            <button onClick={() => setDuelTab("active")} data-testid="admin-tab-active"
+              className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${duelTab === "active" ? "bg-[#D92525] text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>
+              Aktive ({activeDuels.length})
+            </button>
+            <button onClick={() => setDuelTab("finished")} data-testid="admin-tab-finished"
+              className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors ${duelTab === "finished" ? "bg-[#D92525] text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>
+              Avsluttede ({finishedDuels.length})
+            </button>
+          </div>
+          {shownDuels.length === 0 && (
+            <p className="text-slate-500 text-sm" data-testid="admin-duels-empty">
+              {duelTab === "active" ? "Ingen aktive dueller." : "Ingen avsluttede dueller ennå."}
+            </p>
+          )}
+          {shownDuels.map((d) => (
             <AdminDuelRow key={d.id} duel={d} onChanged={load} onRemove={() => removeDuel(d.id)} />
           ))}
 
@@ -247,6 +268,15 @@ function AdminDuelRow({ duel, onChanged, onRemove }) {
     }
   };
 
+  const saveImage = async (field, url) => {
+    try {
+      await api.patch(`/duels/${duel.id}`, { [field]: url });
+      onChanged();
+    } catch (err) {
+      toast.error(formatApiError(err.response?.data?.detail));
+    }
+  };
+
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-4" data-testid={`admin-duel-${duel.id}`}>
       <div className="flex items-start justify-between gap-2 mb-3">
@@ -282,6 +312,17 @@ function AdminDuelRow({ duel, onChanged, onRemove }) {
           className="flex items-center gap-1.5 px-3 py-2 bg-[#0F172A] hover:bg-slate-800 text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-60">
           <Flag size={14} /> {duel.status === "finished" ? "Oppdater" : "Registrer"}
         </button>
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-3 mt-4 pt-3 border-t border-slate-100">
+        <div>
+          <p className="text-xs font-semibold text-slate-500 mb-1">Bilde: {duel.shooter1}</p>
+          <ImageUpload value={duel.shooter1_img} onChange={(url) => saveImage("shooter1_img", url)} testid={`edit-img1-${duel.id}`} label="Last opp / bytt" />
+        </div>
+        <div>
+          <p className="text-xs font-semibold text-slate-500 mb-1">Bilde: {duel.shooter2}</p>
+          <ImageUpload value={duel.shooter2_img} onChange={(url) => saveImage("shooter2_img", url)} testid={`edit-img2-${duel.id}`} label="Last opp / bytt" />
+        </div>
       </div>
     </div>
   );

@@ -1,0 +1,46 @@
+{
+  "summary": "Iteration 3: verified the 3 bug fixes (delete_duel reclaims points, admin image upload + PATCH for existing duels, admin duel tabs). Added /app/backend/tests/test_bugfixes_iter3.py (11 tests) - all PASS. Full regression: 55/56 pytest pass (only known TestEdgeCases::test_brute_force_lockout still fails - pre-existing gap). Frontend E2E on admin panel via preview URL confirms tabs render 'Aktive (n)' / 'Avsluttede (n)' and correctly filter duels by status, ImageUpload controls work (upload, preview thumbnail, form-submit stores /api/files/... URL, edit-img1/edit-img2 PATCH controls persist). Bug 1 was validated E2E via backend API (create duel -> user tips correctly -> admin sets result -> +1 pt -> admin deletes duel -> user drops back by 1) and via UI delete button too. DB cleaned up after tests (duels:0, tournaments:0, tips:0, TEST_* users removed).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/auth/login", "issue": "Still no brute-force lockout after 5 fails (pre-existing, iterations 1 & 2)."},
+      {"endpoint": "DELETE /api/duels/{id}", "issue": "Returns {ok:true} even when the ObjectId is valid but no duel exists (no 404). Minor semantics gap; UX unaffected."},
+      {"endpoint": "GET /api/files/{path}", "issue": "Requests with certain non-browser User-Agents are blocked at CF edge with 403 (only observed with urllib default UA; requests library and browsers work fine). Not a backend bug but worth noting."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Admin panel - Ny duell", "issues": ["'Legg til' button wraps to two lines at 1920px because column is narrow; consider whitespace-nowrap"]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_bugfixes_iter3.py",
+    "/app/test_reports/pytest/iter3_results.xml",
+    "/app/backend/tests/backend_test.py",
+    "/app/backend/tests/test_tournaments.py"
+  ],
+  "action_items": [
+    "(known) Add rate limiting/lockout on POST /api/auth/login after 5 failed attempts.",
+    "(minor) DELETE /api/duels/{id} should 404 when the duel is missing.",
+    "(cosmetic) Legg til button in season create form wraps; add whitespace-nowrap."
+  ],
+  "critical_code_review_comments": [
+    "delete_duel() decrement loop is O(N) writes over users.update_one; fine at demo scale. Batch with bulk_write for larger user bases.",
+    "PATCH /api/duels/{id} (DuelUpdate) has no whitelist on which finished-duel fields may be changed; admin can alter shooter names on finished duels which would silently break shooter profile record aggregation (shooter profile is name-string based). Consider blocking name changes on finished duels or migrating records.",
+    "POST /api/upload writes to Emergent object storage but does not delete the previous image when PATCH replaces it - orphan files accumulate.",
+    "GET /api/files reads the storage_path from db.files but returns the record's content_type regardless of what object storage says; if content_type in DB is wrong, wrong MIME served.",
+    "server.py is now 833 lines; consider splitting auth/duels/tournaments/storage into modules."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_bugfixes_iter3.py (new, 11 tests covering all 3 bug fixes)"
+  ],
+  "success_rate": {"backend": "98% (55/56 total; 11/11 new iter3 tests)", "frontend": "100% of requested flows"},
+  "test_credentials": "admin@riffeltippen.no / Skyting2026! works. Fresh TEST_* users created + cleaned up.",
+  "seed_data_creation": "Created and cleaned up TEST_QA duels and TEST_ui_* users; ran /app/backend/tests/cleanup_test_data.py -> duels:0, users:3 (admin + 2 legacy), tips:0, tournaments:0.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "New iter3 coverage: test_bugfixes_iter3.py = 11 tests (3 delete-reclaim, 6 upload/patch, 2 status-filter). Run all with `cd /app/backend && python -m pytest tests/ -q`; only failure = test_brute_force_lockout (real product gap). Frontend E2E was executed on preview URL (duel-shooter-tips.preview.emergentagent.com) and confirmed admin-tab-active/admin-tab-finished filter correctly and ImageUpload controls (duel-shooter1-img/duel-shooter2-img/edit-img1-{id}/edit-img2-{id}) work end-to-end. Note: /api/files/{path} returns 200 with normal browser/requests UAs but Cloudflare returns 403 for default urllib UA - use requests library.",
+  "rca_of_the_issue": "No bugs found in the 3 fixes. All backend endpoints and UI wiring behave as described in the spec."
+}

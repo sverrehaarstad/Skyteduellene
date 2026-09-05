@@ -15,13 +15,20 @@ export default function Duels() {
   const [hero, setHero] = useState(DEFAULT_HERO);
 
   const load = useCallback(async () => {
-    const { data } = await api.get("/duels", { params: { status: "open" } });
-    setDuels(data);
-    if (user) {
-      const res = await api.get("/my-tips");
-      const map = {};
-      res.data.forEach((t) => (map[t.duel.id] = t.pick));
-      setMyTips(map);
+    try {
+      const { data } = await api.get("/duels", { params: { status: "open" } });
+      // Håndter både array og object format
+      const duelsList = Array.isArray(data) ? data : (data.dueller || []);
+      setDuels(duelsList);
+      if (user) {
+        const res = await api.get("/my-tips");
+        const map = {};
+        res.data.forEach((t) => (map[t.duel.id] = t.pick));
+        setMyTips(map);
+      }
+    } catch (error) {
+      console.error("Feil ved henting av dueller:", error);
+      setDuels([]);
     }
     setLoading(false);
   }, [user]);

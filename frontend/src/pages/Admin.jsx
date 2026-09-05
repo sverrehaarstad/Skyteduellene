@@ -5,13 +5,13 @@ import api, { formatApiError } from "@/lib/api";
 import { toast } from "sonner";
 import { Shield, Plus, Trash2, Flag, Trophy } from "lucide-react";
 
-const DISCIPLINES = ["10m Luftrifle", "50m Match", "300m Standardrifle", "Biathlon Sprint", "Felthurtig"];
+const DISCIPLINES = ["100m", "200m", "300m", "15m", "50m", "Feltskyting", "Stangskyting", "Felthurtigskyting"];
 
 export default function Admin() {
   const { user } = useAuth();
   const [duels, setDuels] = useState([]);
   const [tournaments, setTournaments] = useState([]);
-  const [form, setForm] = useState({ shooter1: "", shooter2: "", shooter1_img: "", shooter2_img: "", discipline: DISCIPLINES[0], venue: "", start_time: "", tournament_id: "" });
+  const [form, setForm] = useState({ shooter1: "", shooter2: "", shooter1_img: "", shooter2_img: "", discipline: DISCIPLINES[0], venue: "", start_time: "", start_at: "", tournament_id: "" });
   const [seasonForm, setSeasonForm] = useState({ name: "", season: "" });
   const [busy, setBusy] = useState(false);
 
@@ -33,7 +33,7 @@ export default function Admin() {
     try {
       await api.post("/duels", form);
       toast.success("Duell opprettet!");
-      setForm({ shooter1: "", shooter2: "", shooter1_img: "", shooter2_img: "", discipline: DISCIPLINES[0], venue: "", start_time: "", tournament_id: "" });
+      setForm({ shooter1: "", shooter2: "", shooter1_img: "", shooter2_img: "", discipline: DISCIPLINES[0], venue: "", start_time: "", start_at: "", tournament_id: "" });
       load();
     } catch (err) {
       toast.error(formatApiError(err.response?.data?.detail));
@@ -106,8 +106,8 @@ export default function Admin() {
                 className="mt-1 w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]" />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-700">Tidspunkt</label>
-              <input data-testid="duel-time" value={form.start_time} onChange={(e) => setForm({ ...form, start_time: e.target.value })} placeholder="f.eks. 18:00"
+              <label className="text-sm font-semibold text-slate-700">Starttidspunkt</label>
+              <input data-testid="duel-startat" type="datetime-local" value={form.start_at} onChange={(e) => setForm({ ...form, start_at: e.target.value })}
                 className="mt-1 w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]" />
             </div>
           </div>

@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import api, { formatApiError } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { ShooterAvatar } from "@/components/ShooterAvatar";
+import { Countdown } from "@/components/Countdown";
 import { toast } from "sonner";
 import { ArrowLeft, MapPin, Clock, BarChart3, Check, Share2, Trophy } from "lucide-react";
 
@@ -113,6 +114,13 @@ export default function DuelDetail() {
           </div>
         )}
 
+        {isOpen && duel.start_at && (
+          <div className="flex flex-col items-center mt-6" data-testid="detail-countdown">
+            <p className="text-xs uppercase tracking-wider text-slate-400 mb-1">Starter om</p>
+            <Countdown startAt={duel.start_at} className="text-lg" />
+          </div>
+        )}
+
         {!isOpen && (
           <div className="text-center mt-6">
             <span className="text-xs uppercase tracking-wider text-slate-400 block mb-1">Vinner</span>
@@ -164,7 +172,7 @@ export default function DuelDetail() {
 function ShareButton({ duel }) {
   const share = async () => {
     const url = window.location.href;
-    const title = `${duel.shooter1} vs ${duel.shooter2} – Riffeltippen`;
+    const title = `${duel.shooter1} vs ${duel.shooter2} – Skyteduellene`;
     if (navigator.share) {
       try { await navigator.share({ title, text: "Tipp på denne duellen!", url }); return; } catch { /* cancelled */ }
     }

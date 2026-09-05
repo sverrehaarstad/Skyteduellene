@@ -18,7 +18,8 @@ export default function TournamentDetail() {
   if (notFound) return <div className="max-w-2xl mx-auto px-4 py-16 text-slate-500">Fant ikke serien.</div>;
   if (!data) return <div className="max-w-2xl mx-auto px-4 py-16 text-slate-500">Laster...</div>;
 
-  const { tournament, standings, duels, winner, finished_count, duel_count } = data;
+  const { tournament, standings, duels, winners, finished_count, duel_count } = data;
+  const winnerList = winners || (data.winner ? [data.winner] : []);
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6" data-testid="tournament-detail">
@@ -34,14 +35,21 @@ export default function TournamentDetail() {
         <h1 className="text-3xl sm:text-4xl font-black tracking-tight" style={{ fontFamily: "Outfit, sans-serif" }}>{tournament.name}</h1>
         <p className="text-slate-300 text-sm mt-2">{finished_count} av {duel_count} {duel_count === 1 ? "duell" : "dueller"} avgjort</p>
 
-        {winner ? (
-          <div className="mt-5 flex items-center gap-3 bg-white/10 rounded-xl p-4" data-testid="tournament-winner">
-            <Crown size={28} className="text-[#EAB308]" />
-            <div>
-              <p className="text-xs uppercase tracking-wider text-slate-300">Totalvinner</p>
-              <p className="text-xl font-black" style={{ fontFamily: "Outfit, sans-serif" }}>{winner.name}</p>
+        {winnerList.length > 0 ? (
+          <div className="mt-5 bg-white/10 rounded-xl p-4" data-testid="tournament-winner">
+            <div className="flex items-center gap-2 text-[#EAB308] mb-2">
+              <Crown size={20} />
+              <p className="text-xs uppercase tracking-wider">{winnerList.length > 1 ? "Delt totalseier" : "Totalvinner"}</p>
             </div>
-            <span className="ml-auto font-mono font-bold text-2xl text-[#EAB308]">{winner.points} p</span>
+            <div className="space-y-2">
+              {winnerList.map((w) => (
+                <div key={w.id} className="flex items-center gap-3" data-testid={`winner-${w.id}`}>
+                  <Crown size={22} className="text-[#EAB308] shrink-0" />
+                  <p className="text-lg font-black" style={{ fontFamily: "Outfit, sans-serif" }}>{w.name}</p>
+                  <span className="ml-auto font-mono font-bold text-xl text-[#EAB308]">{w.points} p</span>
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
           <p className="mt-4 text-sm text-slate-300" data-testid="no-winner">Totalvinner kåres når alle duellene er avgjort.</p>

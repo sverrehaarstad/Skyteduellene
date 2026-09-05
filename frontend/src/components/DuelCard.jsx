@@ -5,6 +5,7 @@ import api, { formatApiError } from "@/lib/api";
 import { toast } from "sonner";
 import { MapPin, Clock, ChevronRight, Trophy } from "lucide-react";
 import { ShooterAvatar } from "@/components/ShooterAvatar";
+import { Countdown } from "@/components/Countdown";
 
 const PickButton = ({ label, sub, active, onClick, count, testid }) => (
   <button
@@ -80,9 +81,18 @@ export const DuelCard = ({ duel, myPick, onTipped }) => {
       </div>
 
       {(duel.venue || duel.start_time) && (
-        <div className="flex items-center justify-center gap-4 text-xs text-slate-500 mb-4">
+        <div className="flex items-center justify-center gap-4 text-xs text-slate-500 mb-3">
           {duel.venue && <span className="flex items-center gap-1"><MapPin size={12} /> {duel.venue}</span>}
           {duel.start_time && <span className="flex items-center gap-1"><Clock size={12} /> {duel.start_time}</span>}
+        </div>
+      )}
+
+      {duel.start_at && (
+        <div className="flex justify-center mb-4" data-testid={`countdown-wrap-${duel.id}`}>
+          <div className="text-center">
+            <p className="text-[10px] uppercase tracking-wider text-slate-400 mb-0.5">Starter om</p>
+            <Countdown startAt={duel.start_at} className="text-sm" />
+          </div>
         </div>
       )}
 

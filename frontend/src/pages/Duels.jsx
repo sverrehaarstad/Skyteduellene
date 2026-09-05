@@ -5,7 +5,7 @@ import { DuelCard } from "@/components/DuelCard";
 import { Target } from "@/components/Target";
 import { Swords } from "lucide-react";
 
-const HERO = "https://images.unsplash.com/photo-1761144530756-47ecd564f8ef?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1OTV8MHwxfHNlYXJjaHwyfHxzaG9vdGluZyUyMHRhcmdldCUyMHJhbmdlJTIwYXRobGV0ZXxlbnwwfHx8fDE3ODg1NDQ1MDN8MA&ixlib=rb-4.1.0&q=85";
+const HERO = "https://images.unsplash.com/photo-1562461094-e060ef34728e?crop=entropy&cs=srgb&fm=jpg&w=1400&q=85";
 
 export default function Duels() {
   const { user, refreshMe } = useAuth();
@@ -38,13 +38,13 @@ export default function Duels() {
         <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-10 max-w-xl">
           <div className="flex items-center gap-2 mb-3">
             <Target size={26} />
-            <span className="text-xs font-bold uppercase tracking-widest text-[#B91C1C]">Skytterduellen</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-[#B91C1C]">Skyteduellene · DFS</span>
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 leading-none" style={{ fontFamily: "Outfit, sans-serif" }}>
-            Tipp riflenes<br /><span className="text-[#D92525]">skarpeste dueller</span>
+            Tipp Norges<br /><span className="text-[#D92525]">skarpeste skyttere</span>
           </h1>
           <p className="text-base text-slate-600 mt-4 max-w-md">
-            Velg vinner (1), uavgjort (U) eller utfordrer (2). Samle poeng og klatre på lederboardet.
+            Duellene fra DFS-banen. Velg vinner (1), uavgjort (U) eller utfordrer (2) – samle poeng og klatre på lederboardet.
           </p>
         </div>
       </div>

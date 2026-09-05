@@ -35,7 +35,7 @@ export const Navbar = () => {
         <Link to="/" className="flex items-center gap-2 shrink-0" data-testid="brand-logo">
           <Target size={30} />
           <span className="font-black text-lg tracking-tight text-slate-900" style={{ fontFamily: "Outfit, sans-serif" }}>
-            Riffel<span className="text-[#D92525]">tippen</span>
+            Skyte<span className="text-[#D92525]">duellene</span>
           </span>
         </Link>
 

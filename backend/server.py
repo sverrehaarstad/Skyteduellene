@@ -88,6 +88,7 @@ class DuelCreate(BaseModel):
     discipline: str
     venue: Optional[str] = ""
     start_time: Optional[str] = ""
+    start_at: Optional[str] = ""
     tournament_id: Optional[str] = ""
 
 
@@ -157,6 +158,7 @@ def duel_to_public(d: dict) -> dict:
         "discipline": d["discipline"],
         "venue": d.get("venue", ""),
         "start_time": d.get("start_time", ""),
+        "start_at": d.get("start_at", ""),
         "status": d.get("status", "open"),
         "outcome": d.get("outcome"),
         "score1": d.get("score1", ""),
@@ -422,11 +424,17 @@ async def tournament_detail(tid: str):
     rows.sort(key=lambda r: (r["points"], r["correct"]), reverse=True)
 
     finished = sum(1 for d in duels if d.get("status") == "finished")
+    all_done = len(duels) > 0 and finished == len(duels)
+    winners = []
+    if all_done and rows and rows[0]["points"] > 0:
+        top = rows[0]["points"]
+        winners = [r for r in rows if r["points"] == top]
     return {
         "tournament": tournament_to_public(t),
         "duels": [duel_to_public(d) for d in duels],
         "standings": rows,
-        "winner": rows[0] if rows and rows[0]["points"] > 0 and finished == len(duels) and len(duels) > 0 else None,
+        "winners": winners,
+        "winner": winners[0] if winners else None,
         "finished_count": finished,
         "duel_count": len(duels),
     }

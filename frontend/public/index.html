@@ -1,64 +1,25 @@
 <!doctype html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#000000" />
-        <meta name="description" content="A product of emergent.sh" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
-        <!--
-        manifest.json provides metadata used when your web app is installed on a
-        user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-        -->
-        <!--
-        Notice the use of %PUBLIC_URL% in the tags above.
-        It will be replaced with the URL of the `public` folder during the build.
-        Only files inside the `public` folder can be referenced from the HTML.
+<html lang="no">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Skyteduellene – konkurrer mot andre skyttere"
+    />
 
-        Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-        work correctly both with client-side routing and a non-root public URL.
-        Learn how to configure a non-root public URL by running `npm run build`.
-        -->
-        <title>Skyteduellene – DFS Skyting</title>
-        <script>
-  // Debug: vis runtime-feil i en alert (fjern etter debugging)
-  window.onerror = function(message, source, lineno, colno, error) {
-    try {
-      var msg = 'Runtime error: ' + message + '\n' + (error && error.stack ? error.stack : 'no stack');
-      alert(msg);
-    } catch (e) {
-      console.error('Error showing alert', e);
-    }
-    console.error('Window error:', message, source, lineno, colno, error);
-    return false;
-  };
-</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
 
-<!-- Temporarily disable emergent-main to test if it's causing crash:
-<script src="https://assets.emergent.sh/scripts/emergent-main.js"></script>
--->
+    <title>Skyteduellene – DFS Skyting</title>
+  </head>
 
-<script>
-  // Safer posthog init (only if posthog script loaded). Wrapped in try/catch
-  try {
-    if (window.posthog && typeof window.posthog.init === 'function') {
-      window.posthog.init("phc_DbsPb39SRc8z3EiQ6Dhj6ikv4H4rTKcht9d4sZSesceP", {
-        api_host: "https://ap.emergent.sh",
-        person_profiles: "identified_only",
-        session_recording: {
-          recordCrossOriginIframes: true,
-          capturePerformance: false
-        }
-      });
-    } else {
-      console.warn('posthog script not available; skipping init for debug.');
-    }
-  } catch (e) {
-    console.error('posthog init failed', e);
-  }
-</script>
-        </script>
-    </body>
+  <body>
+    <div id="root"></div>
+  </body>
 </html>

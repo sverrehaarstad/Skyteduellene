@@ -15,6 +15,9 @@ from bson import ObjectId
 import logging
 import bcrypt
 import jwt
+import secrets
+import asyncio
+import requests
 
 # ---------- DB ----------
 mongo_url = os.environ['MONGO_URL']
@@ -50,14 +53,53 @@ def get_jwt_secret() -> str:
     return os.environ["JWT_SECRET"]
 
 
-def create_access_token(user_id: str, email: str) -> str:
+def create_access_token(user_id: str, email: str, days: int = 7) -> str:
     payload = {
         "sub": user_id,
         "email": email,
-        "exp": now_utc() + timedelta(days=7),
+        "exp": now_utc() + timedelta(days=days),
         "type": "access",
     }
     return jwt.encode(payload, get_jwt_secret(), algorithm=JWT_ALGORITHM)
+
+
+def admin_email_set() -> set:
+    seed = os.environ.get("ADMIN_EMAIL", "").lower()
+    extra = os.environ.get("ADMIN_EMAILS", "")
+    emails = {e.strip().lower() for e in extra.split(",") if e.strip()}
+    if seed:
+        emails.add(seed)
+    return emails
+
+
+def role_for(email: str) -> str:
+    return "admin" if email.lower() in admin_email_set() else "user"
+
+
+def send_reset_email(to_email: str, reset_link: str):
+    api_key = os.environ.get("RESEND_API_KEY", "").strip()
+    if not api_key:
+        logger.info(f"[PASSORD-RESET] Ingen RESEND_API_KEY satt. Tilbakestillingslenke for {to_email}: {reset_link}")
+        return
+    try:
+        import resend
+        resend.api_key = api_key
+        resend.Emails.send({
+            "from": os.environ.get("SENDER_EMAIL", "onboarding@resend.dev"),
+            "to": [to_email],
+            "subject": "Tilbakestill passordet ditt – Skyteduellene",
+            "html": f"""
+                <div style=\"font-family:Arial,sans-serif;max-width:480px;margin:auto\">
+                  <h2 style=\"color:#0F172A\">Tilbakestill passord</h2>
+                  <p>Klikk på lenken under for å velge et nytt passord. Lenken er gyldig i 1 time.</p>
+                  <p><a href=\"{reset_link}\" style=\"display:inline-block;background:#D92525;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:bold\">Velg nytt passord</a></p>
+                  <p style=\"color:#64748b;font-size:12px\">Hvis du ikke ba om dette, kan du se bort fra e-posten.</p>
+                </div>
+            """,
+        })
+    except Exception as e:
+        logger.error(f"Kunne ikke sende e-post via Resend: {e}. Lenke for {to_email}: {reset_link}")
+
 
 
 # ---------- Models ----------
@@ -78,6 +120,22 @@ class RegisterInput(BaseModel):
 class LoginInput(BaseModel):
     email: EmailStr
     password: str
+    remember: Optional[bool] = False
+
+
+class ForgotInput(BaseModel):
+    email: EmailStr
+    origin: Optional[str] = ""
+
+
+class ResetInput(BaseModel):
+    token: str
+    password: str = Field(min_length=6)
+
+
+class GoogleSessionInput(BaseModel):
+    session_id: str
+    remember: Optional[bool] = False
 
 
 class DuelCreate(BaseModel):
@@ -189,7 +247,7 @@ async def register(data: RegisterInput):
         "email": email,
         "name": data.name,
         "password_hash": hash_password(data.password),
-        "role": "user",
+        "role": role_for(email),
         "points": 0,
         "created_at": now_utc(),
     }
@@ -203,10 +261,91 @@ async def register(data: RegisterInput):
 async def login(data: LoginInput):
     email = data.email.lower()
     user = await db.users.find_one({"email": email})
-    if not user or not verify_password(data.password, user["password_hash"]):
+    if not user or not user.get("password_hash") or not verify_password(data.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Feil e-post eller passord")
-    token = create_access_token(str(user["_id"]), email)
+    token = create_access_token(str(user["_id"]), email, days=30 if data.remember else 7)
     return {"token": token, "user": user_to_public(user)}
+
+
+@api_router.post("/auth/google")
+async def google_login(data: GoogleSessionInput):
+    try:
+        resp = await asyncio.to_thread(
+            requests.get,
+            "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+            headers={"X-Session-ID": data.session_id},
+            timeout=15,
+        )
+    except Exception:
+        raise HTTPException(status_code=502, detail="Kunne ikke kontakte Google-innlogging")
+    if resp.status_code != 200:
+        raise HTTPException(status_code=401, detail="Ugyldig eller utløpt Google-økt")
+    info = resp.json()
+    email = (info.get("email") or "").lower()
+    name = info.get("name") or email.split("@")[0]
+    if not email:
+        raise HTTPException(status_code=400, detail="Google returnerte ingen e-post")
+
+    user = await db.users.find_one({"email": email})
+    if not user:
+        doc = {
+            "email": email,
+            "name": name,
+            "password_hash": "",
+            "role": role_for(email),
+            "points": 0,
+            "auth_provider": "google",
+            "picture": info.get("picture", ""),
+            "created_at": now_utc(),
+        }
+        res = await db.users.insert_one(doc)
+        doc["_id"] = res.inserted_id
+        user = doc
+    else:
+        # ensure admin promotion if email is in allowlist
+        if role_for(email) == "admin" and user.get("role") != "admin":
+            await db.users.update_one({"_id": user["_id"]}, {"$set": {"role": "admin"}})
+            user["role"] = "admin"
+    token = create_access_token(str(user["_id"]), email, days=30 if data.remember else 7)
+    return {"token": token, "user": user_to_public(user)}
+
+
+@api_router.post("/auth/forgot-password")
+async def forgot_password(data: ForgotInput):
+    email = data.email.lower()
+    user = await db.users.find_one({"email": email})
+    if user:
+        token = secrets.token_urlsafe(32)
+        await db.password_reset_tokens.insert_one({
+            "token": token,
+            "user_id": str(user["_id"]),
+            "email": email,
+            "expires_at": now_utc() + timedelta(hours=1),
+            "used": False,
+            "created_at": now_utc(),
+        })
+        app_url = (data.origin or os.environ.get("APP_URL", "")).rstrip("/")
+        reset_link = f"{app_url}/reset?token={token}"
+        await asyncio.to_thread(send_reset_email, email, reset_link)
+    # Always generic response to avoid leaking which emails exist
+    return {"ok": True, "message": "Hvis e-posten finnes, har vi sendt en tilbakestillingslenke."}
+
+
+@api_router.post("/auth/reset-password")
+async def reset_password(data: ResetInput):
+    rec = await db.password_reset_tokens.find_one({"token": data.token})
+    if not rec or rec.get("used"):
+        raise HTTPException(status_code=400, detail="Ugyldig eller brukt lenke")
+    expires_at = rec["expires_at"]
+    if isinstance(expires_at, str):
+        expires_at = datetime.fromisoformat(expires_at)
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    if expires_at < now_utc():
+        raise HTTPException(status_code=400, detail="Lenken er utløpt")
+    await db.users.update_one({"_id": ObjectId(rec["user_id"])}, {"$set": {"password_hash": hash_password(data.password)}})
+    await db.password_reset_tokens.update_one({"_id": rec["_id"]}, {"$set": {"used": True}})
+    return {"ok": True}
 
 
 @api_router.get("/auth/me")
@@ -502,6 +641,16 @@ async def startup():
         logger.info("Admin seeded")
     elif not verify_password(admin_password, existing["password_hash"]):
         await db.users.update_one({"email": admin_email}, {"$set": {"password_hash": hash_password(admin_password)}})
+
+    # Promote any allowlisted admin emails (e.g. Sverre) if their account exists
+    for e in admin_email_set():
+        await db.users.update_one({"email": e}, {"$set": {"role": "admin"}})
+
+    # TTL cleanup of expired reset tokens
+    try:
+        await db.password_reset_tokens.create_index("expires_at", expireAfterSeconds=3600)
+    except Exception:
+        pass
 
 
 @app.on_event("shutdown")

@@ -8,6 +8,10 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(localStorage.getItem("rt_token"));
 
   const refreshMe = useCallback(async () => {
+    // Skip during OAuth callback; AuthCallback establishes the session first
+    if (window.location.hash && window.location.hash.includes("session_id=")) {
+      return;
+    }
     if (!localStorage.getItem("rt_token")) {
       setUser(false);
       return;

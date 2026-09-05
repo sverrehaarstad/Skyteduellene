@@ -26,7 +26,7 @@ Norwegian website to tip on duels between two rifle shooters. Users pick nr 1, u
 - Leaderboard by points then correct tips.
 
 ## Implemented (2026-06)
-- Auth: register/login/me, seeded admin (admin@riffeltippen.no). Scoring: 1 poeng per riktig tips.
+- Auth: email/password register/login/me (JWT Bearer i localStorage). Google-innlogging (Emergent-managed) via /auth/google + AuthCallback. «Husk meg» (30 dager) vs 7 dager. Glemt passord → /auth/forgot-password + /auth/reset-password (Resend e-post, faller tilbake til logg når RESEND_API_KEY mangler). Admin-allowlist (ADMIN_EMAILS) promoterer sverrehaarstad@icloud.com automatisk. Seeded admin (admin@riffeltippen.no). Scoring: 1 poeng per riktig tips.
 - Duels: list (open/finished, by tournament), create (admin, incl. shooter image URLs + season), delete, result registration with point re-evaluation, GET single duel.
 - Duel detail page (/duell/:id): shooter avatars + clickable names, scores/winner, tipping, tip distribution % bars, season link, Del-lenke (share/copy).
 - Serier/Sesonger: admin creates seasons and assigns duels; /serier list + /serie/:id detail with sesongtabell (tippere ranked by points) and Totalvinner (kåres når alle dueller avgjort).

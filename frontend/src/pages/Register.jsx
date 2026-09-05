@@ -3,6 +3,7 @@ import { useNavigate, Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import api, { formatApiError } from "@/lib/api";
 import { Target } from "@/components/Target";
+import { GoogleButton } from "@/components/GoogleButton";
 
 export default function Register() {
   const { user, setSession } = useAuth();
@@ -58,6 +59,12 @@ export default function Register() {
           <button data-testid="register-submit" disabled={busy} className="w-full py-2.5 bg-[#D92525] hover:bg-[#B91C1C] text-white font-bold rounded-lg transition-colors disabled:opacity-60">
             {busy ? "Oppretter..." : "Opprett konto"}
           </button>
+          <div className="flex items-center gap-3 py-1">
+            <div className="flex-1 h-px bg-slate-200" />
+            <span className="text-xs text-slate-400 uppercase tracking-wider">eller</span>
+            <div className="flex-1 h-px bg-slate-200" />
+          </div>
+          <GoogleButton label="Registrer med Google" testid="google-register-btn" />
           <p className="text-center text-sm text-slate-500">
             Har du konto? <Link to="/login" className="font-semibold text-[#D92525] hover:underline">Logg inn</Link>
           </p>

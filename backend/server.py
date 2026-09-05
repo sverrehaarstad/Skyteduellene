@@ -138,6 +138,14 @@ class GoogleSessionInput(BaseModel):
     remember: Optional[bool] = False
 
 
+class SettingsInput(BaseModel):
+    hero_image: str
+
+
+class RoleInput(BaseModel):
+    role: Literal["admin", "user"]
+
+
 class DuelCreate(BaseModel):
     shooter1: str
     shooter2: str
@@ -609,8 +617,55 @@ async def shooter_profile(name: str):
 
 
 
-app.include_router(api_router)
+# ---------- Site settings (admin-editable hero background) ----------
+DEFAULT_HERO = "https://customer-assets-4nw71qhi.emergentagent.net/job_duel-shooter-tips/artifacts/7tyyrc1x_Stangskyting1.webp"
 
+
+@api_router.get("/settings")
+async def get_settings():
+    doc = await db.settings.find_one({"key": "site"})
+    hero = doc.get("hero_image") if doc else None
+    return {"hero_image": hero or DEFAULT_HERO}
+
+
+@api_router.put("/settings")
+async def update_settings(data: SettingsInput, admin: dict = Depends(require_admin)):
+    await db.settings.update_one(
+        {"key": "site"},
+        {"$set": {"hero_image": data.hero_image, "updated_at": now_utc()}},
+        upsert=True,
+    )
+    return {"hero_image": data.hero_image}
+
+
+# ---------- Admin: user management ----------
+@api_router.get("/admin/users")
+async def admin_list_users(admin: dict = Depends(require_admin)):
+    users = await db.users.find().sort("created_at", 1).to_list(2000)
+    seed = os.environ.get("ADMIN_EMAIL", "").lower()
+    out = []
+    for u in users:
+        p = user_to_public(u)
+        p["is_seed_admin"] = (u["email"].lower() == seed)
+        out.append(p)
+    return out
+
+
+@api_router.post("/admin/users/{user_id}/role")
+async def admin_set_role(user_id: str, data: RoleInput, admin: dict = Depends(require_admin)):
+    target = await db.users.find_one({"_id": ObjectId(user_id)})
+    if not target:
+        raise HTTPException(status_code=404, detail="Bruker ikke funnet")
+    seed = os.environ.get("ADMIN_EMAIL", "").lower()
+    if target["email"].lower() == seed and data.role != "admin":
+        raise HTTPException(status_code=400, detail="Kan ikke fjerne admin fra hovedkontoen")
+    await db.users.update_one({"_id": ObjectId(user_id)}, {"$set": {"role": data.role}})
+    updated = await db.users.find_one({"_id": ObjectId(user_id)})
+    return user_to_public(updated)
+
+
+
+app.include_router(api_router)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,

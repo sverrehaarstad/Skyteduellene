@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import api, { formatApiError } from "@/lib/api";
 import { toast } from "sonner";
-import { Shield, Plus, Trash2, Flag, Trophy } from "lucide-react";
+import { Shield, Plus, Trash2, Flag, Trophy, Image as ImageIcon, Users, Crown } from "lucide-react";
 
 const DISCIPLINES = ["100m", "200m", "300m", "15m", "50m", "Feltskyting", "Stangskyting", "Felthurtigskyting"];
 
@@ -11,20 +11,47 @@ export default function Admin() {
   const { user } = useAuth();
   const [duels, setDuels] = useState([]);
   const [tournaments, setTournaments] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [heroInput, setHeroInput] = useState("");
   const [form, setForm] = useState({ shooter1: "", shooter2: "", shooter1_img: "", shooter2_img: "", discipline: DISCIPLINES[0], venue: "", start_time: "", start_at: "", tournament_id: "" });
   const [seasonForm, setSeasonForm] = useState({ name: "", season: "" });
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const [d, t] = await Promise.all([api.get("/duels"), api.get("/tournaments")]);
+    const [d, t, s, u] = await Promise.all([
+      api.get("/duels"), api.get("/tournaments"), api.get("/settings"), api.get("/admin/users"),
+    ]);
     setDuels(d.data);
     setTournaments(t.data);
+    setHeroInput(s.data.hero_image || "");
+    setUsers(u.data);
   }, []);
 
   useEffect(() => { load(); }, [load]);
 
   if (user === null) return null;
   if (!user || user.role !== "admin") return <Navigate to="/" replace />;
+
+  const saveHero = async (e) => {
+    e.preventDefault();
+    try {
+      await api.put("/settings", { hero_image: heroInput });
+      toast.success("Bakgrunnsbilde oppdatert!");
+      load();
+    } catch (err) {
+      toast.error(formatApiError(err.response?.data?.detail));
+    }
+  };
+
+  const setRole = async (id, role) => {
+    try {
+      await api.post(`/admin/users/${id}/role`, { role });
+      toast.success(role === "admin" ? "Bruker gjort til admin" : "Admin-rolle fjernet");
+      load();
+    } catch (err) {
+      toast.error(formatApiError(err.response?.data?.detail));
+    }
+  };
 
   const createDuel = async (e) => {
     e.preventDefault();
@@ -157,6 +184,43 @@ export default function Admin() {
           {duels.map((d) => (
             <AdminDuelRow key={d.id} duel={d} onChanged={load} onRemove={() => removeDuel(d.id)} />
           ))}
+
+          {/* Hero background */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 mt-4" data-testid="hero-settings">
+            <h2 className="font-bold text-slate-900 flex items-center gap-2 mb-4"><ImageIcon size={18} className="text-[#D92525]" /> Bakgrunnsbilde (forside)</h2>
+            {heroInput && <img src={heroInput} alt="Forhåndsvisning" className="w-full h-32 object-cover rounded-lg border border-slate-200 mb-3" />}
+            <form onSubmit={saveHero} className="flex flex-col sm:flex-row gap-2">
+              <input data-testid="hero-url" value={heroInput} onChange={(e) => setHeroInput(e.target.value)} placeholder="Bilde-URL"
+                className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]" />
+              <button data-testid="save-hero" className="px-4 py-2 bg-[#0F172A] hover:bg-slate-800 text-white font-bold rounded-lg transition-colors">Lagre</button>
+            </form>
+            <p className="text-xs text-slate-400 mt-2">Endres når som helst – også etter at siden er publisert.</p>
+          </div>
+
+          {/* User management */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 mt-4" data-testid="user-management">
+            <h2 className="font-bold text-slate-900 flex items-center gap-2 mb-4"><Users size={18} className="text-[#D92525]" /> Brukere ({users.length})</h2>
+            <div className="space-y-2">
+              {users.map((u) => (
+                <div key={u.id} className="flex items-center justify-between gap-3 py-2 border-b border-slate-100 last:border-0" data-testid={`user-row-${u.id}`}>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-slate-900 text-sm truncate flex items-center gap-1.5">
+                      {u.role === "admin" && <Crown size={13} className="text-[#EAB308] shrink-0" />}
+                      {u.name}
+                    </p>
+                    <p className="text-xs text-slate-400 truncate">{u.email}</p>
+                  </div>
+                  {u.is_seed_admin ? (
+                    <span className="text-xs font-semibold text-slate-400 shrink-0">Hovedadmin</span>
+                  ) : u.role === "admin" ? (
+                    <button onClick={() => setRole(u.id, "user")} data-testid={`demote-${u.id}`} className="text-xs font-semibold text-slate-600 hover:text-[#D92525] border border-slate-200 rounded-full px-3 py-1.5 transition-colors shrink-0">Fjern admin</button>
+                  ) : (
+                    <button onClick={() => setRole(u.id, "admin")} data-testid={`promote-${u.id}`} className="text-xs font-bold text-white bg-[#D92525] hover:bg-[#B91C1C] rounded-full px-3 py-1.5 transition-colors shrink-0">Gjør til admin</button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

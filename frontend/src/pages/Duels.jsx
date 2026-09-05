@@ -5,13 +5,14 @@ import { DuelCard } from "@/components/DuelCard";
 import { Target } from "@/components/Target";
 import { Swords } from "lucide-react";
 
-const HERO = "https://images.unsplash.com/photo-1562461094-e060ef34728e?crop=entropy&cs=srgb&fm=jpg&w=1400&q=85";
+const DEFAULT_HERO = "https://customer-assets-4nw71qhi.emergentagent.net/job_duel-shooter-tips/artifacts/7tyyrc1x_Stangskyting1.webp";
 
 export default function Duels() {
   const { user, refreshMe } = useAuth();
   const [duels, setDuels] = useState([]);
   const [myTips, setMyTips] = useState({});
   const [loading, setLoading] = useState(true);
+  const [hero, setHero] = useState(DEFAULT_HERO);
 
   const load = useCallback(async () => {
     const { data } = await api.get("/duels", { params: { status: "open" } });
@@ -26,6 +27,9 @@ export default function Duels() {
   }, [user]);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    api.get("/settings").then(({ data }) => data.hero_image && setHero(data.hero_image)).catch(() => {});
+  }, []);
 
   const onTipped = () => { load(); refreshMe(); };
 
@@ -33,7 +37,7 @@ export default function Duels() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
       {/* Hero */}
       <div className="relative rounded-2xl overflow-hidden mb-8 border border-slate-200">
-        <img src={HERO} alt="Rifleskyting" className="w-full h-56 sm:h-72 object-cover" />
+        <img src={hero} alt="DFS skyting" className="w-full h-56 sm:h-72 object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-white via-white/90 to-transparent" />
         <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-10 max-w-xl">
           <div className="flex items-center gap-2 mb-3">

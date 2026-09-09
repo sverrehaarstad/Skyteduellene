@@ -21,7 +21,7 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=30)
 
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # ==================== Models ====================
 
@@ -61,8 +61,7 @@ def get_duels():
         {"id": 2, "navn": "Duel 2", "status": "avsluttet"}
     ])
 
-@app.route('/register', methods=['POST', 'OPTIONS'])
-@app.route('/auth/register', methods=['POST', 'OPTIONS'])
+@app.route('/api/auth/register', methods=['POST', 'OPTIONS'])
 def register():
     if request.method == 'OPTIONS':
         return '', 204
@@ -101,8 +100,7 @@ def register():
         "user": user.to_dict()
     }), 201
 
-@app.route('/login', methods=['POST', 'OPTIONS'])
-@app.route('/auth/login', methods=['POST', 'OPTIONS'])
+@app.route('/api/auth/login', methods=['POST', 'OPTIONS'])
 def login():
     if request.method == 'OPTIONS':
         return '', 204
@@ -127,10 +125,12 @@ def login():
         "user": user.to_dict()
     }), 200
 
-@app.route('/me', methods=['GET'])
-@app.route('/auth/me', methods=['GET'])
+@app.route('/api/auth/me', methods=['GET', 'OPTIONS'])
 @jwt_required()
 def get_me():
+    if request.method == 'OPTIONS':
+        return '', 204
+    
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
     

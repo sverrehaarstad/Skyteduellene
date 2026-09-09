@@ -62,6 +62,7 @@ def get_duels():
     ])
 
 @app.route('/register', methods=['POST', 'OPTIONS'])
+@app.route('/auth/register', methods=['POST', 'OPTIONS'])
 def register():
     if request.method == 'OPTIONS':
         return '', 204
@@ -69,9 +70,6 @@ def register():
     data = request.json
     
     # Validering
-    if not data.get('username') or len(data.get('username', '')) < 1:
-        return jsonify({"error": "Brukernavn er påkrevd"}), 400
-    
     if not data.get('email') or '@' not in data.get('email', ''):
         return jsonify({"error": "Gyldig e-post er påkrevd"}), 400
     
@@ -79,14 +77,15 @@ def register():
         return jsonify({"error": "Passord må være minst 6 tegn"}), 400
     
     # Sjekk om bruker allerede eksisterer
-    if User.query.filter_by(username=data['username']).first():
-        return jsonify({"error": "Brukernavn er allerede i bruk"}), 400
-    
     if User.query.filter_by(email=data['email']).first():
         return jsonify({"error": "E-post er allerede i bruk"}), 400
     
-    # Opprett ny bruker
-    user = User(username=data['username'], email=data['email'])
+    # Opprett ny bruker med navn eller email som username
+    username = data.get('name') or data['email'].split('@')[0]
+    if User.query.filter_by(username=username).first():
+        username = f"{username}_{User.query.count()}"
+    
+    user = User(username=username, email=data['email'])
     user.set_password(data['password'])
     
     db.session.add(user)
@@ -98,24 +97,25 @@ def register():
     return jsonify({
         "success": True, 
         "message": "Bruker opprettet!",
-        "access_token": access_token,
+        "token": access_token,
         "user": user.to_dict()
     }), 201
 
 @app.route('/login', methods=['POST', 'OPTIONS'])
+@app.route('/auth/login', methods=['POST', 'OPTIONS'])
 def login():
     if request.method == 'OPTIONS':
         return '', 204
     
     data = request.json
     
-    if not data.get('username') or not data.get('password'):
-        return jsonify({"error": "Brukernavn og passord er påkrevd"}), 400
+    if not data.get('email') or not data.get('password'):
+        return jsonify({"error": "E-post og passord er påkrevd"}), 400
     
-    user = User.query.filter_by(username=data['username']).first()
+    user = User.query.filter_by(email=data['email']).first()
     
     if not user or not user.check_password(data['password']):
-        return jsonify({"error": "Ugyldig brukernavn eller passord"}), 401
+        return jsonify({"error": "Ugyldig e-post eller passord"}), 401
     
     # Lag JWT token
     access_token = create_access_token(identity=user.id)
@@ -123,11 +123,12 @@ def login():
     return jsonify({
         "success": True,
         "message": "Innlogget!",
-        "access_token": access_token,
+        "token": access_token,
         "user": user.to_dict()
     }), 200
 
 @app.route('/me', methods=['GET'])
+@app.route('/auth/me', methods=['GET'])
 @jwt_required()
 def get_me():
     user_id = get_jwt_identity()

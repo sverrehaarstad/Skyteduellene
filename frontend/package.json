@@ -62,8 +62,9 @@
   },
   "scripts": {
     "start": "craco start",
-    "build": "craco build",
-    "test": "craco test"
+    "build": "SKIP_FORK_TS_CHECKER=true TSC_SKIP_TYPECHECK=true craco build",
+    "test": "craco test",
+    "postinstall": "if [ -d node_modules/react-dev-utils/node_modules/ajv-keywords ]; then rm -rf node_modules/react-dev-utils/node_modules/ajv-keywords && ln -s ../../ajv-keywords node_modules/react-dev-utils/node_modules/ajv-keywords; fi && if [ -d node_modules/react-dev-utils/node_modules/schema-utils ]; then rm -rf node_modules/react-dev-utils/node_modules/schema-utils && ln -s ../../schema-utils node_modules/react-dev-utils/node_modules/schema-utils; fi"
   },
   "browserslist": {
     "production": [

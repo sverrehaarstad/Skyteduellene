@@ -1,5 +1,9 @@
 {
-  "buildCommand": "cd frontend && SKIP_FORK_TS_CHECKER=true TSC_SKIP_TYPECHECK=true npm run build",
+  "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/build",
-  "installCommand": "cd frontend && npm install --legacy-peer-deps"
+  "installCommand": "cd frontend && npm install --legacy-peer-deps",
+  "env": {
+    "SKIP_FORK_TS_CHECKER": "true",
+    "TSC_SKIP_TYPECHECK": "true"
+  }
 }

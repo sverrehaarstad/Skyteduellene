@@ -93,9 +93,17 @@ let webpackConfig = {
       // Remove the fork-ts-checker-webpack-plugin entirely: its bundled
       // ajv-keywords is incompatible with ajv@8 (installed via overrides for
       // terser-webpack-plugin). This is a JS project so type checking is not needed.
-      webpackConfig.plugins = (webpackConfig.plugins || []).filter(
-        (p) => p && p.constructor && p.constructor.name !== 'ForkTsCheckerWebpackPlugin'
-      );
+      webpackConfig.plugins = (webpackConfig.plugins || []).filter((plug) => {
+        if (!plug) return false;
+        const name = plug.constructor && plug.constructor.name;
+        if (name === 'ForkTsCheckerWebpackPlugin') return false;
+        // also drop the plugin by reference if it was already required
+        try {
+          const { ForkTsCheckerWebpackPlugin } = require('fork-ts-checker-webpack-plugin');
+          if (plug instanceof ForkTsCheckerWebpackPlugin) return false;
+        } catch (e) { /* not installed */ }
+        return true;
+      });
 
       // Add ignored patterns to reduce watched directories
         webpackConfig.watchOptions = {

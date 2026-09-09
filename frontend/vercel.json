@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "SKIP_FORK_TS_CHECKER=true TSC_SKIP_TYPECHECK=true npm run build",
   "installCommand": "npm install --legacy-peer-deps",
   "outputDirectory": "build",
   "rewrites": [

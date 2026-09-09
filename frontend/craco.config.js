@@ -70,15 +70,6 @@ if (config.enableHealthCheck) {
 }
 
 let webpackConfig = {
-  eslint: {
-    configure: {
-      extends: ["plugin:react-hooks/recommended"],
-      rules: {
-        "react-hooks/rules-of-hooks": "error",
-        "react-hooks/exhaustive-deps": "warn",
-      },
-    },
-  },
   typescript: {
     // Disable type checking during build to avoid ajv/ajv-keywords version
     // conflicts in fork-ts-checker-webpack-plugin (this is a JS project).

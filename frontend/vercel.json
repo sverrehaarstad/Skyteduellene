@@ -1,0 +1,11 @@
+{
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "outputDirectory": "build",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "${REACT_APP_BACKEND_URL}/api/$1"
+    }
+  ]
+}

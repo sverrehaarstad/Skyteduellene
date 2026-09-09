@@ -1,11 +1,5 @@
 {
-  "directory": "frontend",
-  "buildCommand": "npm run build",
-  "installCommand": "npm install",
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "${REACT_APP_BACKEND_URL}/api/$1"
-    }
-  ]
+  "buildCommand": "cd frontend && npm run build",
+  "outputDirectory": "frontend/build",
+  "installCommand": "cd frontend && npm install"
 }

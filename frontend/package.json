@@ -64,7 +64,7 @@
     "start": "craco start",
     "build": "SKIP_FORK_TS_CHECKER=true TSC_SKIP_TYPECHECK=true craco build",
     "test": "craco test",
-    "postinstall": "if [ -d node_modules/react-dev-utils/node_modules/ajv-keywords ]; then rm -rf node_modules/react-dev-utils/node_modules/ajv-keywords && ln -s ../../ajv-keywords node_modules/react-dev-utils/node_modules/ajv-keywords; fi && if [ -d node_modules/react-dev-utils/node_modules/schema-utils ]; then rm -rf node_modules/react-dev-utils/node_modules/schema-utils && ln -s ../../schema-utils node_modules/react-dev-utils/node_modules/schema-utils; fi"
+    "postinstall": "node /tmp/ajv-keywords-patch.js || true"
   },
   "browserslist": {
     "production": [
@@ -82,11 +82,9 @@
     "@babel/plugin-proposal-private-property-in-object": "7.21.11",
     "@craco/craco": "7.1.0",
     "@emergentbase/visual-edits": "https://assets.emergent.sh/npm/emergentbase-visual-edits-1.0.13.tgz",
-    "@eslint/js": "9.23.0",
     "@types/lodash": "4.17.24",
     "autoprefixer": "10.4.20",
     "dotenv": "16.4.5",
-    "eslint": "9.23.0",
     "eslint-plugin-import": "2.31.0",
     "eslint-plugin-jsx-a11y": "6.10.2",
     "eslint-plugin-react": "7.37.4",
@@ -143,7 +141,6 @@
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
   "overrides": {
     "ajv": "8.20.0",
-    "ajv-keywords": "5.1.0",
-    "fork-ts-checker-webpack-plugin": "9.1.0"
+    "ajv-keywords": "5.1.0"
   }
 }

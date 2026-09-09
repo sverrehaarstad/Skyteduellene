@@ -79,11 +79,23 @@ let webpackConfig = {
       },
     },
   },
+  typescript: {
+    // Disable type checking during build to avoid ajv/ajv-keywords version
+    // conflicts in fork-ts-checker-webpack-plugin (this is a JS project).
+    check: false,
+    reactPresets: [],
+  },
   webpack: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
     },
     configure: (webpackConfig) => {
+      // Remove the fork-ts-checker-webpack-plugin entirely: its bundled
+      // ajv-keywords is incompatible with ajv@8 (installed via overrides for
+      // terser-webpack-plugin). This is a JS project so type checking is not needed.
+      webpackConfig.plugins = (webpackConfig.plugins || []).filter(
+        (p) => p && p.constructor && p.constructor.name !== 'ForkTsCheckerWebpackPlugin'
+      );
 
       // Add ignored patterns to reduce watched directories
         webpackConfig.watchOptions = {

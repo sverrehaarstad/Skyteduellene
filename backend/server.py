@@ -96,7 +96,15 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 
 def get_jwt_secret() -> str:
-    return os.environ["JWT_SECRET"]
+    # Prefer the canonical name; fall back to the legacy Flask name so a
+    # config migrated from the old app still boots. Fail loudly (not with a
+    # cryptic KeyError) if neither is configured.
+    secret = os.environ.get("JWT_SECRET") or os.environ.get("JWT_SECRET_KEY")
+    if not secret:
+        raise RuntimeError(
+            "JWT secret is not configured. Set the JWT_SECRET environment variable."
+        )
+    return secret
 
 
 def create_access_token(user_id: str, email: str, days: int = 7) -> str:
@@ -781,10 +789,23 @@ async def serve_file(path: str):
 
 
 app.include_router(api_router)
+# Build the allowed-origin list defensively. A bare "*" combined with
+# allow_credentials=True is rejected by browsers (CORS preflight fails), so
+# when CORS_ORIGINS is unset (or explicitly "*") we fall back to the real
+# frontend origins instead of "*".
+_cors_env = (os.environ.get("CORS_ORIGINS") or "").strip()
+if not _cors_env or _cors_env == "*":
+    _allow_origins = [
+        "https://skyteduellene.vercel.app",
+        "https://skyteduellene.onrender.com",
+    ]
+else:
+    _allow_origins = [o.strip() for o in _cors_env.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_origins=_allow_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )

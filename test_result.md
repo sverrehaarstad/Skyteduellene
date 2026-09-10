@@ -49,10 +49,8 @@
 ##
 ## test_plan:
 ##   current_focus:
-##     - "Task name 1"
-##     - "Task name 2"
-##   stuck_tasks:
-##     - "Task name with persistent issues"
+##     - "Promote existing user to admin on /auth/login when email is in ADMIN_EMAILS"
+##   stuck_tasks: []
 ##   test_all: false
 ##   test_priority: "high_first"  # or "sequential" or "stuck_first"
 ##
@@ -101,3 +99,21 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+## user_problem_statement: "Ved /auth/login returneres eksisterende bruker direkte WITHOUT å oppdatere rollen, så en eksisterende bruker med e-post i ADMIN_EMAILS (f.eks. sverrehaarstad@icloud.com) ikke får role='admin' ved vanlig e-post/passord-innlogging. /auth/register og /auth/google oppdaterer rollen, men /auth/login gjør det ikke."
+
+## backend:
+##   - task: "Promote existing user to admin on /auth/login when email is in ADMIN_EMAILS"
+##     implemented: true
+##     working: false
+##     file: "backend/server.py"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: true
+##     status_history:
+##         -working: false
+##         -agent: "main"
+##         -comment: "Added role promotion block in /auth/login (backend/server.py:345-347) mirroring the /auth/google path: if role_for(email)=='admin' and user.get('role')!='admin' -> db.users.update_one({'_id': user['_id']}, {'$set': {'role': 'admin'}}) and user['role']='admin', placed before create_access_token(). No new admin system, no MongoDB manual changes, no hardcoded email. Syntax check passed (python3 ast.parse). Runtime/pytest not available in this sandbox (no pip/pytest/uvicorn/MongoDB) - needs testing agent to run backend/tests against the deployed backend."
+
+## agent_communication:
+##     -agent: "main"
+##     -message: "Fixed /auth/login admin promotion in backend/server.py:345-347. Please run backend/tests (esp. test_bugfixes_iter3.py and backend_test.py) against the deployed backend to verify an existing user with an email in ADMIN_EMAILS (e.g. sverrehaarstad@icloud.com) gets role='admin' after a normal email/password login, and that user_to_public returns role='admin'. Runtime/pytest unavailable in this sandbox, so testing must run in the deployed environment."

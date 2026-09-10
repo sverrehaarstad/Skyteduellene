@@ -28,3 +28,8 @@ services:
         sync: false
       - key: EMERGENT_LLM_KEY
         sync: false
+      # Admin emails: anyone whose email is in this comma-separated list
+      # is promoted to the "admin" role on login and on server startup.
+      # Sverre Hårstad (sverrehaarstad@icloud.com) is a site administrator.
+      - key: ADMIN_EMAILS
+        value: sverrehaarstad@icloud.com

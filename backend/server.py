@@ -117,12 +117,19 @@ def create_access_token(user_id: str, email: str, days: int = 7) -> str:
     return jwt.encode(payload, get_jwt_secret(), algorithm=JWT_ALGORITHM)
 
 
+# Admin-e-postar som alltid har admin-tilgang, uavhengig av miljøvariabelar.
+# Dette sikrar at repo-eigaren (Sverre Hårstad) blir admin ved kvar oppstart
+# og ved registrering, også før ADMIN_EMAIL/ADMIN_EMAILS er konfigurert.
+DEFAULT_ADMIN_EMAILS = {"sverrehaarstad@icloud.com"}
+
+
 def admin_email_set() -> set:
     seed = os.environ.get("ADMIN_EMAIL", "").lower()
     extra = os.environ.get("ADMIN_EMAILS", "")
     emails = {e.strip().lower() for e in extra.split(",") if e.strip()}
     if seed:
         emails.add(seed)
+    emails |= {e.lower() for e in DEFAULT_ADMIN_EMAILS}
     return emails
 
 

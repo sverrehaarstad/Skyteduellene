@@ -342,9 +342,13 @@ async def login(data: LoginInput):
     user = await db.users.find_one({"email": email})
     if not user or not user.get("password_hash") or not verify_password(data.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Feil e-post eller passord")
+
+    if role_for(email) == "admin" and user.get("role") != "admin":
+        await db.users.update_one({"_id": user["_id"]}, {"$set": {"role": "admin"}})
+        user["role"] = "admin"
+
     token = create_access_token(str(user["_id"]), email, days=30 if data.remember else 7)
     return {"token": token, "user": user_to_public(user)}
-
 
 @api_router.post("/auth/google")
 async def google_login(data: GoogleSessionInput):

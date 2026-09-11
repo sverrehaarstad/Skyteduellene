@@ -63,7 +63,7 @@
   "scripts": {
     "start": "craco start",
     "build": "SKIP_FORK_TS_CHECKER=true TSC_SKIP_TYPECHECK=true craco build",
-    "test": "craco test",
+    "test": "craco test"
   },
   "browserslist": {
     "production": [

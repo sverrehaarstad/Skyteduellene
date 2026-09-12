@@ -176,6 +176,25 @@ def delete_duel(duel_id):
 
     return jsonify({"success": True}), 200
 
+@app.route('/api/tournaments/<int:tid>', methods=['DELETE'])
+@jwt_required()
+def delete_tournament(tid):
+    tournament = Tournament.query.get(tid)
+
+    if not tournament:
+        return jsonify({"error": "Serie ikke funnet"}), 404
+
+    duels = Duel.query.filter_by(tournament_id=str(tid)).all()
+
+    for duel in duels:
+        Tip.query.filter_by(duel_id=duel.id).delete()
+        db.session.delete(duel)
+
+    db.session.delete(tournament)
+    db.session.commit()
+
+    return jsonify({"success": True}), 200
+
 @app.route('/api/duels', methods=['POST', 'OPTIONS'])
 def create_duel():
     if request.method == 'OPTIONS':

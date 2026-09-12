@@ -61,7 +61,7 @@ class User(db.Model):
 def hello():
     return jsonify({"message": "Skyteduellene API kjører! 🎯"})
 
-@app.route('/duels', methods=['GET'])
+@app.route('/api/duels', methods=['GET'])
 def get_duels():
     return jsonify([
         {"id": 1, "navn": "Duel 1", "status": "aktiv"},

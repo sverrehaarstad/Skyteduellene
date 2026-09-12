@@ -146,6 +146,16 @@ def hello():
 def get_duels():
     duels = Duel.query.order_by(Duel.id.desc()).all()
     return jsonify([duel.to_dict() for duel in duels])
+
+@app.route('/api/duels/<int:duel_id>', methods=['GET'])
+def get_duel(duel_id):
+    duel = Duel.query.get(duel_id)
+
+    if not duel:
+        return jsonify({"error": "Duell ikke funnet"}), 404
+
+    return jsonify(duel.to_dict()), 200
+
 @app.route('/api/duels', methods=['POST', 'OPTIONS'])
 def create_duel():
     if request.method == 'OPTIONS':

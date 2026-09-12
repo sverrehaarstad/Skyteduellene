@@ -184,6 +184,31 @@ def tip_duel(duel_id):
         "tip": tip.to_dict()
     }), 200
 
+@app.route('/api/duels/<int:duel_id>/result', methods=['POST', 'OPTIONS'])
+@jwt_required()
+def save_duel_result(duel_id):
+    if request.method == 'OPTIONS':
+        return '', 204
+
+    data = request.get_json() or {}
+
+    duel = Duel.query.get(duel_id)
+    if not duel:
+        return jsonify({"error": "Duell ikke funnet"}), 404
+
+    outcome = data.get("outcome")
+
+    if outcome not in ["1", "X", "2"]:
+        return jsonify({"error": "Ugyldig resultat"}), 400
+
+    duel.outcome = outcome
+    duel.score1 = str(data.get("score1", ""))
+    duel.score2 = str(data.get("score2", ""))
+    duel.status = "finished"
+
+    db.session.commit()
+
+    return jsonify(duel.to_dict()), 200
 @app.route('/api/my-tips', methods=['GET'])
 @jwt_required()
 def get_my_tips():

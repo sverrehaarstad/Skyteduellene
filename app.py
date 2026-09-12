@@ -125,7 +125,26 @@ def create_duel():
     db.session.commit()
 
     return jsonify(duel.to_dict()), 201
-    
+@app.route('/api/duels/<int:duel_id>/tip', methods=['POST', 'OPTIONS'])
+@jwt_required()
+def tip_duel(duel_id):
+    if request.method == 'OPTIONS':
+        return '', 204
+
+    user_id = int(get_jwt_identity())
+    data = request.get_json() or {}
+    pick = data.get("pick")
+
+    if pick not in ["1", "X", "2"]:
+        return jsonify({"error": "Ugyldig tips"}), 400
+
+    return jsonify({
+        "success": True,
+        "duel_id": duel_id,
+        "user_id": user_id,
+        "pick": pick
+    }), 200
+
 @app.route('/api/auth/register', methods=['POST', 'OPTIONS'])
 def register():
     if request.method == 'OPTIONS':

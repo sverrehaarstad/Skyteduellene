@@ -138,14 +138,13 @@ def get_me():
     if request.method == 'OPTIONS':
         return '', 204
     
-user_id = int(get_jwt_identity())
+    user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
     
     if not user:
         return jsonify({"error": "Bruker ikke funnet"}), 404
     
     return jsonify(user.to_dict()), 200
-
 # ==================== Database initialization ====================
 
 @app.before_request

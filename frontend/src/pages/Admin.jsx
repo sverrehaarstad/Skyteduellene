@@ -20,9 +20,11 @@ export default function Admin() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const [d, t, s, u] = await Promise.all([
-      api.get("/duels"), api.get("/tournaments"), api.get("/settings"), api.get("/admin/users"),
-    ]);
+const d = await api.get("/duels");
+
+const t = await api.get("/tournaments").catch(() => ({ data: [] }));
+const s = await api.get("/settings").catch(() => ({ data: {} }));
+const u = await api.get("/admin/users").catch(() => ({ data: [] }));
     setDuels(d.data);
     setTournaments(t.data);
     setHeroInput(s.data.hero_image || "");

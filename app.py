@@ -54,20 +54,78 @@ class User(db.Model):
             'role': get_role(self.email),
             'created_at': self.created_at.isoformat()
         }
+class Duel(db.Model):
+    __tablename__ = 'duels'
 
+    id = db.Column(db.Integer, primary_key=True)
+    shooter1 = db.Column(db.String(120), nullable=False)
+    shooter2 = db.Column(db.String(120), nullable=False)
+    shooter1_img = db.Column(db.Text, default="")
+    shooter2_img = db.Column(db.Text, default="")
+    discipline = db.Column(db.String(80), default="")
+    venue = db.Column(db.String(120), default="")
+    start_time = db.Column(db.String(100), default="")
+    start_at = db.Column(db.String(100), default="")
+    tournament_id = db.Column(db.String(100), default="")
+    status = db.Column(db.String(30), default="open")
+    outcome = db.Column(db.String(20), default="")
+    score1 = db.Column(db.String(50), default="")
+    score2 = db.Column(db.String(50), default="")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "shooter1": self.shooter1,
+            "shooter2": self.shooter2,
+            "shooter1_img": self.shooter1_img,
+            "shooter2_img": self.shooter2_img,
+            "discipline": self.discipline,
+            "venue": self.venue,
+            "start_time": self.start_time,
+            "start_at": self.start_at,
+            "tournament_id": self.tournament_id,
+            "status": self.status,
+            "outcome": self.outcome,
+            "score1": self.score1,
+            "score2": self.score2
+        }
 # ==================== Routes ====================
 
 @app.route('/')
 def hello():
     return jsonify({"message": "Skyteduellene API kjører! 🎯"})
 
-@app.route('/duels', methods=['GET'])
+@app.route('/api/duels', methods=['GET'])
 def get_duels():
-    return jsonify([
-        {"id": 1, "navn": "Duel 1", "status": "aktiv"},
-        {"id": 2, "navn": "Duel 2", "status": "avsluttet"}
-    ])
+    duels = Duel.query.order_by(Duel.id.desc()).all()
+    return jsonify([duel.to_dict() for duel in duels])
+@app.route('/api/duels', methods=['POST', 'OPTIONS'])
+def create_duel():
+    if request.method == 'OPTIONS':
+        return '', 204
 
+    data = request.get_json() or {}
+
+    if not data.get("shooter1") or not data.get("shooter2"):
+        return jsonify({"error": "Begge navnene må fylles ut"}), 400
+
+    duel = Duel(
+        shooter1=data.get("shooter1", ""),
+        shooter2=data.get("shooter2", ""),
+        shooter1_img=data.get("shooter1_img", ""),
+        shooter2_img=data.get("shooter2_img", ""),
+        discipline=data.get("discipline", ""),
+        venue=data.get("venue", ""),
+        start_time=data.get("start_time", ""),
+        start_at=data.get("start_at", ""),
+        tournament_id=data.get("tournament_id", "")
+    )
+
+    db.session.add(duel)
+    db.session.commit()
+
+    return jsonify(duel.to_dict()), 201
+    
 @app.route('/api/auth/register', methods=['POST', 'OPTIONS'])
 def register():
     if request.method == 'OPTIONS':

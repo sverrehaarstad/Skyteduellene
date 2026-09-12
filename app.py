@@ -561,6 +561,37 @@ def update_settings():
     db.session.commit()
 
     return jsonify(setting.to_dict()), 200
+
+@app.route('/api/upload', methods=['POST'])
+@jwt_required()
+def upload_image():
+    user_id = int(get_jwt_identity())
+    user = User.query.get(user_id)
+
+    if not user or get_role(user.email) != "admin":
+        return jsonify({"error": "Ingen tilgang"}), 403
+
+    if "file" not in request.files:
+        return jsonify({"error": "Ingen bildefil mottatt"}), 400
+
+    file = request.files["file"]
+
+    if not file or file.filename == "":
+        return jsonify({"error": "Ingen bildefil valgt"}), 400
+
+    try:
+        result = cloudinary.uploader.upload(
+            file,
+            folder="skyteduellene"
+        )
+
+        return jsonify({
+            "url": result["secure_url"]
+        }), 200
+
+    except Exception as e:
+        print("Cloudinary upload error:", e)
+        return jsonify({"error": "Kunne ikke laste opp bildet"}), 500
 # ==================== Database initialization ====================
 
 @app.before_request

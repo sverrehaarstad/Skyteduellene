@@ -23,6 +23,12 @@ db = SQLAlchemy(app)
 jwt = JWTManager(app)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
+ADMIN_EMAILS = {
+    "sverrehaarstad@icloud.com"
+}
+
+def get_role(email):
+    return "admin" if email.lower() in ADMIN_EMAILS else "user"
 # ==================== Models ====================
 
 class User(db.Model):
@@ -40,13 +46,14 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
     
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'username': self.username,
-            'email': self.email,
-            'created_at': self.created_at.isoformat()
-        }
+   def to_dict(self):
+    return {
+        'id': self.id,
+        'username': self.username,
+        'email': self.email,
+        'role': get_role(self.email),
+        'created_at': self.created_at.isoformat()
+    }
 
 # ==================== Routes ====================
 
@@ -91,7 +98,7 @@ def register():
     db.session.commit()
     
     # Lag JWT token
-    access_token = create_access_token(identity=user.id)
+   access_token = create_access_token(identity=str(user.id))
     
     return jsonify({
         "success": True, 
@@ -116,7 +123,7 @@ def login():
         return jsonify({"error": "Ugyldig e-post eller passord"}), 401
     
     # Lag JWT token
-    access_token = create_access_token(identity=user.id)
+   access_token = create_access_token(identity=str(user.id))
     
     return jsonify({
         "success": True,
@@ -131,7 +138,7 @@ def get_me():
     if request.method == 'OPTIONS':
         return '', 204
     
-    user_id = get_jwt_identity()
+user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
     
     if not user:

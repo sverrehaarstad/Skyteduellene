@@ -120,6 +120,22 @@ class Tip(db.Model):
             "correct": correct,
             "duel": duel.to_dict() if duel else None
         }
+class Tournament(db.Model):
+    __tablename__ = 'tournaments'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    season = db.Column(db.String(50), default="")
+
+    def to_dict(self):
+        duel_count = Duel.query.filter_by(tournament_id=str(self.id)).count()
+
+        return {
+            "id": self.id,
+            "name": self.name,
+            "season": self.season,
+            "duel_count": duel_count
+        }
 # ==================== Routes ====================
 
 @app.route('/')
@@ -253,6 +269,36 @@ def leaderboard():
     rows.sort(key=lambda x: x["points"], reverse=True)
 
     return jsonify(rows), 200
+
+@app.route('/api/tournaments', methods=['GET'])
+def get_tournaments():
+    tournaments = Tournament.query.order_by(Tournament.id.desc()).all()
+    return jsonify([t.to_dict() for t in tournaments]), 200
+
+
+@app.route('/api/tournaments', methods=['POST', 'OPTIONS'])
+@jwt_required()
+def create_tournament():
+    if request.method == 'OPTIONS':
+        return '', 204
+
+    data = request.get_json() or {}
+
+    name = data.get("name", "").strip()
+    season = data.get("season", "").strip()
+
+    if not name:
+        return jsonify({"error": "Navn på serie/sesong mangler"}), 400
+
+    tournament = Tournament(
+        name=name,
+        season=season
+    )
+
+    db.session.add(tournament)
+    db.session.commit()
+
+    return jsonify(tournament.to_dict()), 201
 
 @app.route('/api/auth/register', methods=['POST', 'OPTIONS'])
 def register():

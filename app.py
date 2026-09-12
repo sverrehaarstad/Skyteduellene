@@ -107,7 +107,7 @@ class Tip(db.Model):
         db.UniqueConstraint('user_id', 'duel_id', name='unique_user_duel_tip'),
     )
 
-  def to_dict(self):
+def to_dict(self):
     duel = Duel.query.get(self.duel_id)
 
     correct = False

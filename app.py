@@ -90,6 +90,11 @@ class Duel(db.Model):
             "start_time": self.start_time,
             "start_at": self.start_at,
             "tournament_id": self.tournament_id,
+            "tournament_name": (
+    Tournament.query.get(int(self.tournament_id)).name
+    if self.tournament_id and Tournament.query.get(int(self.tournament_id))
+    else ""
+),
             "status": self.status,
             "outcome": self.outcome,
             "score1": self.score1,

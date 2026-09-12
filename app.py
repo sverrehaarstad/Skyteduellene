@@ -68,13 +68,6 @@ def get_duels():
         {"id": 2, "navn": "Duel 2", "status": "avsluttet"}
     ])
 
-@app.route('/api/settings', methods=['GET'])
-def get_settings():
-    return jsonify({
-        "site_name": "Skyteduellene",
-        "registration_enabled": True
-    })
-
 @app.route('/api/auth/register', methods=['POST', 'OPTIONS'])
 def register():
     if request.method == 'OPTIONS':

@@ -28,7 +28,6 @@ export default function Duels() {
       }
     } catch (error) {
       console.error("Feil ved henting av dueller:", error);
-      setDuels([]);
     }
     setLoading(false);
   }, [user]);

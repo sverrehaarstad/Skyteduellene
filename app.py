@@ -300,6 +300,25 @@ def create_tournament():
 
     return jsonify(tournament.to_dict()), 201
 
+@app.route('/api/tournaments/<int:tid>', methods=['GET'])
+def get_tournament(tid):
+    tournament = Tournament.query.get(tid)
+
+    if not tournament:
+        return jsonify({"error": "Fant ikke serien"}), 404
+
+    duels = Duel.query.filter_by(tournament_id=str(tid)).order_by(Duel.id.desc()).all()
+
+    return jsonify({
+        "tournament": tournament.to_dict(),
+        "duels": [duel.to_dict() for duel in duels],
+        "standings": [],
+        "winners": [],
+        "winner": None,
+        "finished_count": sum(1 for duel in duels if duel.status == "finished"),
+        "duel_count": len(duels)
+    }), 200
+
 @app.route('/api/auth/register', methods=['POST', 'OPTIONS'])
 def register():
     if request.method == 'OPTIONS':

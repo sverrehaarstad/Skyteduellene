@@ -141,6 +141,17 @@ class Tournament(db.Model):
             "season": self.season,
             "duel_count": duel_count
         }
+
+class SiteSetting(db.Model):
+    __tablename__ = 'site_settings'
+
+    id = db.Column(db.Integer, primary_key=True)
+    hero_image = db.Column(db.Text, default="")
+
+    def to_dict(self):
+        return {
+            "hero_image": self.hero_image
+        }
 # ==================== Routes ====================
 
 @app.route('/')
@@ -514,6 +525,34 @@ def get_me():
         return jsonify({"error": "Bruker ikke funnet"}), 404
     
     return jsonify(user.to_dict()), 200
+
+@app.route('/api/settings', methods=['GET'])
+def get_settings():
+    setting = SiteSetting.query.first()
+
+    if not setting:
+        return jsonify({"hero_image": ""}), 200
+
+    return jsonify(setting.to_dict()), 200
+
+
+@app.route('/api/settings', methods=['PUT'])
+@jwt_required()
+def update_settings():
+    data = request.get_json() or {}
+    hero_image = data.get("hero_image", "")
+
+    setting = SiteSetting.query.first()
+
+    if not setting:
+        setting = SiteSetting(hero_image=hero_image)
+        db.session.add(setting)
+    else:
+        setting.hero_image = hero_image
+
+    db.session.commit()
+
+    return jsonify(setting.to_dict()), 200
 # ==================== Database initialization ====================
 
 @app.before_request

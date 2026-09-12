@@ -98,7 +98,7 @@ def register():
     db.session.commit()
     
     # Lag JWT token
-   access_token = create_access_token(identity=str(user.id))
+    access_token = create_access_token(identity=str(user.id))
     
     return jsonify({
         "success": True, 
@@ -123,7 +123,7 @@ def login():
         return jsonify({"error": "Ugyldig e-post eller passord"}), 401
     
     # Lag JWT token
-   access_token = create_access_token(identity=str(user.id))
+    access_token = create_access_token(identity=str(user.id))
     
     return jsonify({
         "success": True,

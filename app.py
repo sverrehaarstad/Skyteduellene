@@ -223,6 +223,37 @@ def get_my_tips():
 
     return jsonify([tip.to_dict() for tip in tips]), 200
 
+@app.route('/api/leaderboard', methods=['GET'])
+def leaderboard():
+    users = User.query.all()
+    rows = []
+
+    for user in users:
+        tips = Tip.query.filter_by(user_id=user.id).all()
+
+        total_tips = len(tips)
+        correct = 0
+
+        for tip in tips:
+            duel = Duel.query.get(tip.duel_id)
+            if duel and duel.status == "finished" and tip.pick == duel.outcome:
+                correct += 1
+
+        accuracy = round((correct / total_tips) * 100) if total_tips > 0 else 0
+
+        rows.append({
+            "id": user.id,
+            "name": user.username,
+            "correct": correct,
+            "total_tips": total_tips,
+            "accuracy": accuracy,
+            "points": correct
+        })
+
+    rows.sort(key=lambda x: x["points"], reverse=True)
+
+    return jsonify(rows), 200
+
 @app.route('/api/auth/register', methods=['POST', 'OPTIONS'])
 def register():
     if request.method == 'OPTIONS':

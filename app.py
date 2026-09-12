@@ -107,19 +107,19 @@ class Tip(db.Model):
         db.UniqueConstraint('user_id', 'duel_id', name='unique_user_duel_tip'),
     )
 
-def to_dict(self):
-    duel = Duel.query.get(self.duel_id)
+    def to_dict(self):
+        duel = Duel.query.get(self.duel_id)
 
-    correct = False
-    if duel and duel.status == "finished":
-        correct = self.pick == duel.outcome
+        correct = False
+        if duel and duel.status == "finished":
+            correct = self.pick == duel.outcome
 
-    return {
-        "id": self.id,
-        "pick": self.pick,
-        "correct": correct,
-        "duel": duel.to_dict() if duel else None
-    }
+        return {
+            "id": self.id,
+            "pick": self.pick,
+            "correct": correct,
+            "duel": duel.to_dict() if duel else None
+        }
 # ==================== Routes ====================
 
 @app.route('/')

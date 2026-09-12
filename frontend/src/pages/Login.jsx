@@ -3,7 +3,6 @@ import { useNavigate, Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import api, { formatApiError } from "@/lib/api";
 import { Target } from "@/components/Target";
-import { GoogleButton } from "@/components/GoogleButton";
 
 export default function Login() {
   const { user, setSession } = useAuth();
@@ -62,12 +61,7 @@ export default function Login() {
           <button data-testid="login-submit" disabled={busy} className="w-full py-2.5 bg-[#D92525] hover:bg-[#B91C1C] text-white font-bold rounded-lg transition-colors disabled:opacity-60">
             {busy ? "Logger inn..." : "Logg inn"}
           </button>
-          <div className="flex items-center gap-3 py-1">
-            <div className="flex-1 h-px bg-slate-200" />
-            <span className="text-xs text-slate-400 uppercase tracking-wider">eller</span>
-            <div className="flex-1 h-px bg-slate-200" />
-          </div>
-          <GoogleButton />
+         
           <p className="text-center text-sm text-slate-500">
             Ny her? <Link to="/register" className="font-semibold text-[#D92525] hover:underline">Registrer deg</Link>
           </p>

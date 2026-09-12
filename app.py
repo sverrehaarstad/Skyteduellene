@@ -1,3 +1,5 @@
+import cloudinary
+import cloudinary.uploader
 import os
 from datetime import timedelta
 from flask import Flask, jsonify, request
@@ -18,6 +20,12 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # JWT config
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'your-secret-key-change-in-production')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=30)
+
+cloudinary.config(
+    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.environ.get("CLOUDINARY_API_KEY"),
+    api_secret=os.environ.get("CLOUDINARY_API_SECRET")
+)
 
 db = SQLAlchemy(app)
 jwt = JWTManager(app)

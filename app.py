@@ -161,6 +161,21 @@ def get_duel(duel_id):
 
     return jsonify(duel.to_dict()), 200
 
+@app.route('/api/duels/<int:duel_id>', methods=['DELETE'])
+@jwt_required()
+def delete_duel(duel_id):
+    duel = Duel.query.get(duel_id)
+
+    if not duel:
+        return jsonify({"error": "Duell ikke funnet"}), 404
+
+    Tip.query.filter_by(duel_id=duel_id).delete()
+
+    db.session.delete(duel)
+    db.session.commit()
+
+    return jsonify({"success": True}), 200
+
 @app.route('/api/duels', methods=['POST', 'OPTIONS'])
 def create_duel():
     if request.method == 'OPTIONS':

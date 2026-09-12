@@ -307,15 +307,84 @@ def get_tournament(tid):
     if not tournament:
         return jsonify({"error": "Fant ikke serien"}), 404
 
-    duels = Duel.query.filter_by(tournament_id=str(tid)).order_by(Duel.id.desc()).all()
+    duels = Duel.query.filter_by(
+        tournament_id=str(tid)
+    ).order_by(Duel.id.desc()).all()
+
+    duel_ids = [duel.id for duel in duels]
+
+    standings = []
+
+    users = User.query.all()
+
+    for user in users:
+        # Ikke vis admin i sesongtabellen
+        if get_role(user.email) == "admin":
+            continue
+
+        tips = Tip.query.filter(
+            Tip.user_id == user.id,
+            Tip.duel_id.in_(duel_ids)
+        ).all() if duel_ids else []
+
+        if not tips:
+            continue
+
+        correct = 0
+
+        for tip in tips:
+            duel = Duel.query.get(tip.duel_id)
+
+            if (
+                duel
+                and duel.status == "finished"
+                and tip.pick == duel.outcome
+            ):
+                correct += 1
+
+        total_tips = len(tips)
+        accuracy = round(
+            (correct / total_tips) * 100, 1
+        ) if total_tips > 0 else 0
+
+        standings.append({
+            "id": user.id,
+            "name": user.username,
+            "points": correct,
+            "correct": correct,
+            "total_tips": total_tips,
+            "accuracy": accuracy
+        })
+
+    standings.sort(
+        key=lambda row: (row["points"], row["correct"]),
+        reverse=True
+    )
+
+    finished_count = sum(
+        1 for duel in duels
+        if duel.status == "finished"
+    )
+
+    all_done = len(duels) > 0 and finished_count == len(duels)
+
+    winners = []
+
+    if all_done and standings and standings[0]["points"] > 0:
+        top_points = standings[0]["points"]
+
+        winners = [
+            row for row in standings
+            if row["points"] == top_points
+        ]
 
     return jsonify({
         "tournament": tournament.to_dict(),
         "duels": [duel.to_dict() for duel in duels],
-        "standings": [],
-        "winners": [],
-        "winner": None,
-        "finished_count": sum(1 for duel in duels if duel.status == "finished"),
+        "standings": standings,
+        "winners": winners,
+        "winner": winners[0] if winners else None,
+        "finished_count": finished_count,
         "duel_count": len(duels)
     }), 200
 

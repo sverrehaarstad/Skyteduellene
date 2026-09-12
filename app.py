@@ -73,8 +73,14 @@ class Duel(db.Model):
     score2 = db.Column(db.String(50), default="")
 
     def to_dict(self):
+        tip_counts = {
+    "1": Tip.query.filter_by(duel_id=self.id, pick="1").count(),
+    "X": Tip.query.filter_by(duel_id=self.id, pick="X").count(),
+    "2": Tip.query.filter_by(duel_id=self.id, pick="2").count()
+}
         return {
             "id": self.id,
+            "tip_counts": tip_counts,
             "shooter1": self.shooter1,
             "shooter2": self.shooter2,
             "shooter1_img": self.shooter1_img,
@@ -88,6 +94,26 @@ class Duel(db.Model):
             "outcome": self.outcome,
             "score1": self.score1,
             "score2": self.score2
+        }
+class Tip(db.Model):
+    __tablename__ = 'tips'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False)
+    duel_id = db.Column(db.Integer, nullable=False)
+    pick = db.Column(db.String(1), nullable=False)
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'duel_id', name='unique_user_duel_tip'),
+    )
+
+    def to_dict(self):
+        duel = Duel.query.get(self.duel_id)
+
+        return {
+            "id": self.id,
+            "pick": self.pick,
+            "duel": duel.to_dict() if duel else None
         }
 # ==================== Routes ====================
 
@@ -138,12 +164,34 @@ def tip_duel(duel_id):
     if pick not in ["1", "X", "2"]:
         return jsonify({"error": "Ugyldig tips"}), 400
 
+    duel = Duel.query.get(duel_id)
+    if not duel:
+        return jsonify({"error": "Duell ikke funnet"}), 404
+
+    tip = Tip.query.filter_by(user_id=user_id, duel_id=duel_id).first()
+
+    if tip:
+        tip.pick = pick
+    else:
+        tip = Tip(user_id=user_id, duel_id=duel_id, pick=pick)
+        db.session.add(tip)
+
+    db.session.commit()
+
     return jsonify({
         "success": True,
-        "duel_id": duel_id,
-        "user_id": user_id,
-        "pick": pick
+        "message": "Tips lagret",
+        "tip": tip.to_dict()
     }), 200
+
+@app.route('/api/my-tips', methods=['GET'])
+@jwt_required()
+def get_my_tips():
+    user_id = int(get_jwt_identity())
+
+    tips = Tip.query.filter_by(user_id=user_id).all()
+
+    return jsonify([tip.to_dict() for tip in tips]), 200
 
 @app.route('/api/auth/register', methods=['POST', 'OPTIONS'])
 def register():

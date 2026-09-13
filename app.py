@@ -262,7 +262,9 @@ def create_duel():
         venue=data.get("venue", ""),
         start_time=data.get("start_time", ""),
         start_at=data.get("start_at", ""),
-        tournament_id=data.get("tournament_id", "")
+        tournament_id=str(
+    (data.get("tournament_ids") or [data.get("tournament_id", "")])[0]
+)
     )
 
     db.session.add(duel)

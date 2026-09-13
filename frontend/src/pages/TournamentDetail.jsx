@@ -10,7 +10,8 @@ export default function TournamentDetail() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [notFound, setNotFound] = useState(false);
-
+  const [needsCode, setNeedsCode] = useState(false);
+  
   useEffect(() => {
     api.get(`/tournaments/${id}`).then(({ data }) => setData(data)).catch(() => setNotFound(true));
   }, [id]);

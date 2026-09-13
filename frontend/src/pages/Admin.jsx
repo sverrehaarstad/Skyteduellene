@@ -60,6 +60,19 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
       toast.error(formatApiError(err.response?.data?.detail));
     }
   };
+  const removeUser = async (id, name) => {
+  if (!window.confirm(`Er du sikker på at du vil slette brukeren ${name}?`)) {
+    return;
+  }
+
+  try {
+    await api.delete(`/admin/users/${id}`);
+    toast.success("Brukeren er slettet");
+    load();
+  } catch (err) {
+    toast.error(formatApiError(err.response?.data?.error || err.response?.data?.detail));
+  }
+};
 
   const createDuel = async (e) => {
     e.preventDefault();

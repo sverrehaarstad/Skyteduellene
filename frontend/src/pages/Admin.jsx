@@ -336,6 +336,14 @@ function AdminDuelRow({ duel, onChanged, onRemove }) {
           className="flex items-center gap-1.5 px-3 py-2 bg-[#0F172A] hover:bg-slate-800 text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-60">
           <Flag size={14} /> {duel.status === "finished" ? "Oppdater" : "Registrer"}
         </button>
+        {duel.status === "finished" && (
+  <button
+    onClick={removePoints}
+    className="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 text-sm font-bold rounded-lg transition-colors"
+  >
+    Fjern poeng
+  </button>
+)}
       </div>
 
       <div className="grid sm:grid-cols-2 gap-3 mt-4 pt-3 border-t border-slate-100">

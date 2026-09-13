@@ -736,7 +736,27 @@ def create_tables():
                 )
                 db.session.add(point_record)
                 changed = True
+                
+        for duel in Duel.query.all():
+    if not duel.tournament_id:
+        continue
 
+    try:
+        tournament_id = int(duel.tournament_id)
+    except (TypeError, ValueError):
+        continue
+
+    existing_link = DuelTournament.query.filter_by(
+        duel_id=duel.id,
+        tournament_id=tournament_id
+    ).first()
+
+    if not existing_link:
+        db.session.add(DuelTournament(
+            duel_id=duel.id,
+            tournament_id=tournament_id
+        ))
+        changed = True
     if changed:
         db.session.commit()
 

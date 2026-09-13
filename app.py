@@ -133,6 +133,24 @@ class Tip(db.Model):
             "correct": correct,
             "duel": duel.to_dict() if duel else None
         }
+
+class PointRecord(db.Model):
+    __tablename__ = 'point_records'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False)
+
+    duel_id = db.Column(db.Integer, nullable=False)
+    tournament_id = db.Column(db.Integer, nullable=True)
+
+    points = db.Column(db.Integer, default=0)
+
+    shooter1 = db.Column(db.String(120), default="")
+    shooter2 = db.Column(db.String(120), default="")
+
+    active = db.Column(db.Boolean, default=True)
+
+    created_at = db.Column(db.DateTime, default=db.func.now())
 class Tournament(db.Model):
     __tablename__ = 'tournaments'
 

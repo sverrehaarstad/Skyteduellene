@@ -669,13 +669,14 @@ def get_tournament(tid):
     duel_ids = [link.duel_id for link in links]
 
     all_duels = Duel.query.filter(
-    Duel.id.in_(duel_ids)
-).order_by(Duel.id.desc()).all() if duel_ids else []
+        Duel.id.in_(duel_ids)
+    ).order_by(Duel.id.desc()).all() if duel_ids else []
 
-visible_duels = [
-    duel for duel in all_duels
-    if not duel.is_deleted
-]
+    visible_duels = [
+        duel for duel in all_duels
+        if not duel.is_deleted
+    ]
+
     standings = []
 
     users = User.query.all()

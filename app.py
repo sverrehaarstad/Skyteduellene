@@ -187,7 +187,7 @@ class Tournament(db.Model):
     name = db.Column(db.String(120), nullable=False)
     season = db.Column(db.String(50), default="")
 
-      def to_dict(self):
+    def to_dict(self):
         duel_count = DuelTournament.query.filter_by(
             tournament_id=self.id
         ).count()

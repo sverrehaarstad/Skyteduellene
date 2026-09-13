@@ -293,8 +293,40 @@ def get_duels():
 def get_duel(duel_id):
     duel = Duel.query.get(duel_id)
 
-    if not duel:
+    if not duel or duel.is_deleted:
         return jsonify({"error": "Duell ikke funnet"}), 404
+
+    links = DuelTournament.query.filter_by(duel_id=duel.id).all()
+
+    private_tournament_ids = []
+
+    for link in links:
+        access = TournamentAccess.query.filter_by(
+            tournament_id=link.tournament_id
+        ).first()
+
+        if access and access.is_private:
+            private_tournament_ids.append(link.tournament_id)
+
+    if private_tournament_ids:
+        verify_jwt_in_request(optional=True)
+        identity = get_jwt_identity()
+
+        if not identity:
+            return jsonify({"error": "Ingen tilgang"}), 403
+
+        user_id = int(identity)
+        user = User.query.get(user_id)
+
+        is_admin = user is not None and get_role(user.email) == "admin"
+
+        membership = TournamentMember.query.filter(
+            TournamentMember.user_id == user_id,
+            TournamentMember.tournament_id.in_(private_tournament_ids)
+        ).first()
+
+        if not is_admin and not membership:
+            return jsonify({"error": "Ingen tilgang"}), 403
 
     return jsonify(duel.to_dict()), 200
 

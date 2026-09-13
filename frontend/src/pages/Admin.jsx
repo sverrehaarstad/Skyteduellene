@@ -212,11 +212,21 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
           <div className="bg-white border border-slate-200 rounded-2xl p-6 mt-4" data-testid="hero-settings">
             <h2 className="font-bold text-slate-900 flex items-center gap-2 mb-4"><ImageIcon size={18} className="text-[#D92525]" /> Bakgrunnsbilde (forside)</h2>
             {heroInput && <img src={heroInput} alt="Forhåndsvisning" className="w-full h-32 object-cover rounded-lg border border-slate-200 mb-3" />}
-            <form onSubmit={saveHero} className="flex flex-col sm:flex-row gap-2">
-              <input data-testid="hero-url" value={heroInput} onChange={(e) => setHeroInput(e.target.value)} placeholder="Bilde-URL"
-                className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]" />
-              <button data-testid="save-hero" className="px-4 py-2 bg-[#0F172A] hover:bg-slate-800 text-white font-bold rounded-lg transition-colors">Lagre</button>
-            </form>
+          <form onSubmit={saveHero} className="flex flex-col gap-3">
+  <ImageUpload
+    value={heroInput}
+    onChange={setHeroInput}
+    testid="hero-image-upload"
+    label="Last opp bakgrunnsbilde"
+  />
+
+  <button
+    data-testid="save-hero"
+    className="px-4 py-2 bg-[#0F172A] hover:bg-slate-800 text-white font-bold rounded-lg transition-colors"
+  >
+    Lagre
+  </button>
+</form>
             <p className="text-xs text-slate-400 mt-2">Endres når som helst – også etter at siden er publisert.</p>
           </div>
 

@@ -289,7 +289,7 @@ for tournament_id in tournament_ids:
 
 db.session.commit()
 
-    return jsonify(duel.to_dict()), 201
+return jsonify(duel.to_dict()), 201
 @app.route('/api/duels/<int:duel_id>/tip', methods=['POST', 'OPTIONS'])
 @jwt_required()
 def tip_duel(duel_id):

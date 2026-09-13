@@ -79,6 +79,7 @@ class Duel(db.Model):
     outcome = db.Column(db.String(20), default="")
     score1 = db.Column(db.String(50), default="")
     score2 = db.Column(db.String(50), default="")
+    is_deleted = db.Column(db.Boolean, default=False)
 
     def to_dict(self):
         tip_counts = {

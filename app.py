@@ -533,9 +533,14 @@ def create_tournament():
 
     name = data.get("name", "").strip()
     season = data.get("season", "").strip()
+    is_private = bool(data.get("is_private", False))
+    access_code = str(data.get("access_code", "")).strip()
 
     if not name:
         return jsonify({"error": "Navn på serie/sesong mangler"}), 400
+
+    if is_private and not access_code:
+        return jsonify({"error": "Privat serie må ha en kode"}), 400
 
     tournament = Tournament(
         name=name,
@@ -543,6 +548,19 @@ def create_tournament():
     )
 
     db.session.add(tournament)
+    db.session.flush()
+
+    access = TournamentAccess(
+        tournament_id=tournament.id,
+        is_private=is_private,
+        access_code_hash=(
+            generate_password_hash(access_code)
+            if is_private
+            else ""
+        )
+    )
+
+    db.session.add(access)
     db.session.commit()
 
     return jsonify(tournament.to_dict()), 201

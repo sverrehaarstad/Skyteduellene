@@ -199,6 +199,20 @@ class Tournament(db.Model):
             "duel_count": duel_count
         }
 
+class TournamentAccess(db.Model):
+    __tablename__ = 'tournament_access'
+
+    tournament_id = db.Column(db.Integer, primary_key=True)
+    is_private = db.Column(db.Boolean, default=False)
+    access_code_hash = db.Column(db.String(255), default="")
+
+
+class TournamentMember(db.Model):
+    __tablename__ = 'tournament_members'
+
+    tournament_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, primary_key=True)
+    joined_at = db.Column(db.DateTime, default=db.func.now())
 class SiteSetting(db.Model):
     __tablename__ = 'site_settings'
 

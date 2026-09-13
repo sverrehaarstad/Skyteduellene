@@ -984,8 +984,9 @@ def upload_image():
 def create_tables():
     db.create_all()
 
-changed = False
-for duel in Duel.query.all():
+    changed = False
+
+    for duel in Duel.query.all():
         if not duel.tournament_id:
             continue
 
@@ -1006,7 +1007,7 @@ for duel in Duel.query.all():
             ))
             changed = True
 
-       if changed:
+    if changed:
         db.session.commit()
 if __name__ == '__main__':
     app.run(debug=False)

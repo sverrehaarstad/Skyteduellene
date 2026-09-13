@@ -24,7 +24,21 @@ export default function TournamentDetail() {
     }
   });
   }, [id]);
+const joinPrivateSeries = async (e) => {
+  e.preventDefault();
 
+  try {
+    await api.post(`/tournaments/${id}/join`, {
+      access_code: accessCode,
+    });
+
+    const response = await api.get(`/tournaments/${id}`);
+    setData(response.data);
+    setNeedsCode(false);
+  } catch (err) {
+    alert("Feil kode");
+  }
+};
   if (notFound) return <div className="max-w-2xl mx-auto px-4 py-16 text-slate-500">Fant ikke serien.</div>;
   if (!data) return <div className="max-w-2xl mx-auto px-4 py-16 text-slate-500">Laster...</div>;
 

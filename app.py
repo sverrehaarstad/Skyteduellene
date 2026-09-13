@@ -210,7 +210,13 @@ class SiteSetting(db.Model):
             "hero_image": self.hero_image
         }
 # ==================== Routes ====================
+def get_latest_reset(scope_type, scope_key):
+    reset = ScoreReset.query.filter_by(
+        scope_type=scope_type,
+        scope_key=str(scope_key)
+    ).order_by(ScoreReset.reset_at.desc()).first()
 
+    return reset.reset_at if reset else None
 @app.route('/')
 def hello():
     return jsonify({"message": "Skyteduellene API kjører! 🎯"})

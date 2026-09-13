@@ -63,6 +63,7 @@ const joinPrivateSeries = async (e) => {
           >
             Bli med
           </button>
+          {codeError && <p className="text-sm text-red-600">{codeError}</p>}
         </form>
       </div>
     </div>

@@ -109,6 +109,19 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
       toast.error(formatApiError(err.response?.data?.error || err.response?.data?.detail));
     }
   };
+  const resetGlobalPoints = async () => {
+    if (!window.confirm("Nullstille totalpoengene for alle brukere?")) {
+      return;
+    }
+
+    try {
+      await api.post("/leaderboard/reset-points");
+      toast.success("Totalpoengene er nullstilt");
+      load();
+    } catch (err) {
+      toast.error(formatApiError(err.response?.data?.error || err.response?.data?.detail));
+    }
+  };
   const removeDuel = async (id) => {
     await api.delete(`/duels/${id}`);
     toast.success("Duell slettet");

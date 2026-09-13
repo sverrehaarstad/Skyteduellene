@@ -288,7 +288,19 @@ function AdminDuelRow({ duel, onChanged, onRemove }) {
       toast.error(formatApiError(err.response?.data?.detail));
     }
   };
+  const removePoints = async () => {
+  if (!window.confirm("Fjerne poengene fra denne duellen for alle brukere?")) {
+    return;
+  }
 
+  try {
+    await api.post(`/duels/${duel.id}/remove-points`);
+    toast.success("Poengene fra duellen er fjernet");
+    onChanged();
+  } catch (err) {
+    toast.error(formatApiError(err.response?.data?.error || err.response?.data?.detail));
+  }
+};
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-4" data-testid={`admin-duel-${duel.id}`}>
       <div className="flex items-start justify-between gap-2 mb-3">

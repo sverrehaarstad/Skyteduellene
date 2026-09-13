@@ -122,6 +122,21 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
       toast.error(formatApiError(err.response?.data?.error || err.response?.data?.detail));
     }
   };
+  const resetPointsForSeason = async (season) => {
+    if (!season) return;
+
+    if (!window.confirm(`Nullstille poengene for hele sesongen ${season}?`)) {
+      return;
+    }
+
+    try {
+      await api.post(`/seasons/${encodeURIComponent(season)}/reset-points`);
+      toast.success(`Poengene for sesongen ${season} er nullstilt`);
+      load();
+    } catch (err) {
+      toast.error(formatApiError(err.response?.data?.error || err.response?.data?.detail));
+    }
+  };
   const removeDuel = async (id) => {
     await api.delete(`/duels/${id}`);
     toast.success("Duell slettet");

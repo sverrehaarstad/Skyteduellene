@@ -33,7 +33,7 @@ export default function Tournaments() {
                   <Trophy size={20} className="text-[#EAB308]" />
                 </div>
                 <div>
-                  <p className="font-bold text-slate-900">{t.name}</p>
+                  <p className="font-bold text-slate-900">{t.name}{t.is_private ? " 🔒" : ""}</p>
                   <p className="text-sm text-slate-500">{t.season ? `${t.season} · ` : ""}{t.duel_count} {t.duel_count === 1 ? "duell" : "dueller"}</p>
                 </div>
               </div>

@@ -32,12 +32,12 @@ db = SQLAlchemy(app)
 jwt = JWTManager(app)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-ADMIN_EMAILS = {
-    "sverrehaarstad@icloud.com"
+ADMIN_USERNAMES = {
+    "Sverre Hårstad"
 }
 
-def get_role(email):
-    return "admin" if email.lower() in ADMIN_EMAILS else "user"
+def get_role(username):
+    return "admin" if username in ADMIN_USERNAMES else "user"
 # ==================== Models ====================
 
 class User(db.Model):
@@ -60,7 +60,7 @@ class User(db.Model):
             'id': self.id,
             'username': self.username,
             'email': self.email,
-            'role': get_role(self.email),
+            'role': get_role(self.username),
             'created_at': self.created_at.isoformat()
         }
 class Duel(db.Model):

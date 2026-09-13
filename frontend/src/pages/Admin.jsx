@@ -351,7 +351,7 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
                   <div className="min-w-0">
                     <p className="font-semibold text-slate-900 text-sm truncate flex items-center gap-1.5">
                       {u.role === "admin" && <Crown size={13} className="text-[#EAB308] shrink-0" />}
-                      {u.name}
+                      {u.username}
                     </p>
                     <p className="text-xs text-slate-400 truncate">{u.email}</p>
                   </div>

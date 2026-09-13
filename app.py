@@ -250,15 +250,15 @@ def get_duels():
     user = User.query.get(user_id) if user_id else None
     is_admin = user is not None and get_role(user.email) == "admin"
 
-if is_admin:
-    duels = Duel.query.filter(
-        Duel.is_deleted == False
-    ).order_by(Duel.id.desc()).all()
-else:
-    duels = Duel.query.filter(
-        Duel.is_deleted == False,
-        Duel.status != "finished"
-    ).order_by(Duel.id.desc()).all()
+    if is_admin:
+        duels = Duel.query.filter(
+            Duel.is_deleted == False
+        ).order_by(Duel.id.desc()).all()
+    else:
+        duels = Duel.query.filter(
+            Duel.is_deleted == False,
+            Duel.status != "finished"
+        ).order_by(Duel.id.desc()).all()
 
     visible_duels = []
 

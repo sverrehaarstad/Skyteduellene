@@ -555,7 +555,7 @@ def get_tournament(tid):
 
         if not tips:
             continue
-               latest_reset = get_latest_reset("tournament", tid)
+        latest_reset = get_latest_reset("tournament", tid)
 
         point_records = []
 

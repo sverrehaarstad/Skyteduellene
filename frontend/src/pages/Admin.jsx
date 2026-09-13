@@ -239,6 +239,14 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
   />
   Privat serie
 </label>
+              {seasonForm.is_private && (
+  <input
+    value={seasonForm.access_code}
+    onChange={(e) => setSeasonForm({ ...seasonForm, access_code: e.target.value })}
+    placeholder="Kode til privat serie"
+    className="w-full sm:w-48 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]"
+  />
+)}
               <button data-testid="submit-season" className="px-4 py-2 bg-[#0F172A] hover:bg-slate-800 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5">
                 <Plus size={16} /> Legg til
               </button>

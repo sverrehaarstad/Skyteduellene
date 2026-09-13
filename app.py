@@ -268,7 +268,26 @@ def create_duel():
     )
 
     db.session.add(duel)
-    db.session.commit()
+db.session.flush()
+
+tournament_ids = data.get("tournament_ids")
+
+if not isinstance(tournament_ids, list):
+    old_tournament_id = data.get("tournament_id", "")
+    tournament_ids = [old_tournament_id] if old_tournament_id else []
+
+for tournament_id in tournament_ids:
+    try:
+        tournament_id = int(tournament_id)
+    except (TypeError, ValueError):
+        continue
+
+    db.session.add(DuelTournament(
+        duel_id=duel.id,
+        tournament_id=tournament_id
+    ))
+
+db.session.commit()
 
     return jsonify(duel.to_dict()), 201
 @app.route('/api/duels/<int:duel_id>/tip', methods=['POST', 'OPTIONS'])

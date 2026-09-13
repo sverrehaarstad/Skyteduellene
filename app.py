@@ -56,13 +56,12 @@ class User(db.Model):
         return check_password_hash(self.password_hash, password)
     
     def to_dict(self):
-        return {
-            'id': self.id,
-            'username': self.username,
-            'email': self.email,
-            'role': get_role(self.username),
-            'created_at': self.created_at.isoformat()
-        }
+       return {
+    'id': self.id,
+    'username': self.username,
+    'role': get_role(self.username),
+    'created_at': self.created_at.isoformat()
+}
 class Duel(db.Model):
     __tablename__ = 'duels'
 

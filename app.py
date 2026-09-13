@@ -582,6 +582,37 @@ def get_admin_users():
     users = User.query.order_by(User.created_at.asc()).all()
 
     return jsonify([user.to_dict() for user in users]), 200
+@app.route('/api/admin/users/<int:target_user_id>', methods=['DELETE'])
+@jwt_required()
+def delete_user(target_user_id):
+    admin_id = int(get_jwt_identity())
+    admin = User.query.get(admin_id)
+
+    if not admin or get_role(admin.email) != "admin":
+        return jsonify({"error": "Ingen tilgang"}), 403
+
+    if target_user_id == admin_id:
+        return jsonify({"error": "Du kan ikke slette din egen admin-konto"}), 400
+
+    target_user = User.query.get(target_user_id)
+
+    if not target_user:
+        return jsonify({"error": "Bruker ikke funnet"}), 404
+
+    if get_role(target_user.email) == "admin":
+        return jsonify({"error": "Admin-kontoer kan ikke slettes"}), 400
+
+    Tip.query.filter_by(user_id=target_user_id).delete()
+    PointRecord.query.filter_by(user_id=target_user_id).delete()
+    TournamentMember.query.filter_by(user_id=target_user_id).delete()
+
+    db.session.delete(target_user)
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": "Brukeren er slettet"
+    }), 200
 @app.route('/api/tournaments', methods=['GET'])
 def get_tournaments():
     tournaments = Tournament.query.order_by(Tournament.id.desc()).all()

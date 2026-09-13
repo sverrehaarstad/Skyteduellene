@@ -15,7 +15,7 @@ export default function Admin() {
   const [users, setUsers] = useState([]);
   const [heroInput, setHeroInput] = useState("");
   const [form, setForm] = useState({ shooter1: "", shooter2: "", shooter1_img: "", shooter2_img: "", discipline: DISCIPLINES[0], venue: "", start_time: "", start_at: "", tournament_ids: [] });
-  const [seasonForm, setSeasonForm] = useState({ name: "", season: "" });
+  const [seasonForm, setSeasonForm] = useState({ name: "", season: "", is_private: false, access_code: "" });
   const [duelTab, setDuelTab] = useState("active");
   const [busy, setBusy] = useState(false);
 

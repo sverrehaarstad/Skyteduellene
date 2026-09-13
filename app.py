@@ -172,6 +172,14 @@ class DuelTournament(db.Model):
 
     duel_id = db.Column(db.Integer, primary_key=True)
     tournament_id = db.Column(db.Integer, primary_key=True)
+
+class ScoreReset(db.Model):
+    __tablename__ = 'score_resets'
+
+    id = db.Column(db.Integer, primary_key=True)
+    scope_type = db.Column(db.String(30), nullable=False)
+    scope_key = db.Column(db.String(120), nullable=False)
+    reset_at = db.Column(db.DateTime, default=db.func.now(), nullable=False)
 class Tournament(db.Model):
     __tablename__ = 'tournaments'
 

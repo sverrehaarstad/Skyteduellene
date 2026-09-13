@@ -758,7 +758,7 @@ def get_tournament(tid):
 
     return jsonify({
         "tournament": tournament.to_dict(),
-        "duels": [duel.to_dict() for duel in duels],
+                "duels": [duel.to_dict() for duel in visible_duels],
         "standings": standings,
         "winners": winners,
         "winner": winners[0] if winners else None,

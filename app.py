@@ -610,6 +610,33 @@ def get_tournament(tid):
         "duel_count": len(duels)
     }), 200
 
+@app.route('/api/tournaments/<int:tid>/reset-points', methods=['POST'])
+@jwt_required()
+def reset_tournament_points(tid):
+    user_id = int(get_jwt_identity())
+    user = User.query.get(user_id)
+
+    if not user or get_role(user.email) != "admin":
+        return jsonify({"error": "Ingen tilgang"}), 403
+
+    tournament = Tournament.query.get(tid)
+
+    if not tournament:
+        return jsonify({"error": "Serie ikke funnet"}), 404
+
+    reset = ScoreReset(
+        scope_type="tournament",
+        scope_key=str(tid)
+    )
+
+    db.session.add(reset)
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": "Poengene i serien er nullstilt"
+    }), 200
+
 @app.route('/api/auth/register', methods=['POST', 'OPTIONS'])
 def register():
     if request.method == 'OPTIONS':

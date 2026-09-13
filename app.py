@@ -207,13 +207,11 @@ def delete_duel(duel_id):
     if not duel:
         return jsonify({"error": "Duell ikke funnet"}), 404
 
-    Tip.query.filter_by(duel_id=duel_id).delete()
-
-    db.session.delete(duel)
+    duel.is_deleted = True
     db.session.commit()
 
     return jsonify({"success": True}), 200
-
+    
 @app.route('/api/tournaments/<int:tid>', methods=['DELETE'])
 @jwt_required()
 def delete_tournament(tid):

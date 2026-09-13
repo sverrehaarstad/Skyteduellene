@@ -563,8 +563,16 @@ def get_tournament(tid):
 
         if not tips:
             continue
-        latest_reset = get_latest_reset("tournament", tid)
+        tournament_reset = get_latest_reset("tournament", tid)
+        season_reset = get_latest_reset("season", tournament.season)
 
+        reset_times = [
+            reset_time
+            for reset_time in [tournament_reset, season_reset]
+            if reset_time
+        ]
+
+        latest_reset = max(reset_times) if reset_times else None
         point_records = []
 
         if duel_ids:

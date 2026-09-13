@@ -648,6 +648,27 @@ def reset_tournament_points(tid):
         "message": "Poengene i serien er nullstilt"
     }), 200
 
+@app.route('/api/leaderboard/reset-points', methods=['POST'])
+@jwt_required()
+def reset_global_points():
+    user_id = int(get_jwt_identity())
+    user = User.query.get(user_id)
+
+    if not user or get_role(user.email) != "admin":
+        return jsonify({"error": "Ingen tilgang"}), 403
+
+    reset = ScoreReset(
+        scope_type="global",
+        scope_key="all"
+    )
+
+    db.session.add(reset)
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": "Totalpoengene er nullstilt"
+    }), 200
 @app.route('/api/auth/register', methods=['POST', 'OPTIONS'])
 def register():
     if request.method == 'OPTIONS':

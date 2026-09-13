@@ -565,6 +565,54 @@ def create_tournament():
 
     return jsonify(tournament.to_dict()), 201
 
+@app.route('/api/tournaments/<int:tid>/join', methods=['POST'])
+@jwt_required()
+def join_tournament(tid):
+    user_id = int(get_jwt_identity())
+
+    tournament = Tournament.query.get(tid)
+    if not tournament:
+        return jsonify({"error": "Serie ikke funnet"}), 404
+
+    access = TournamentAccess.query.filter_by(
+        tournament_id=tid
+    ).first()
+
+    if not access or not access.is_private:
+        return jsonify({"error": "Denne serien er ikke privat"}), 400
+
+    existing_member = TournamentMember.query.filter_by(
+        tournament_id=tid,
+        user_id=user_id
+    ).first()
+
+    if existing_member:
+        return jsonify({
+            "success": True,
+            "message": "Du er allerede med i serien"
+        }), 200
+
+    data = request.get_json() or {}
+    access_code = str(data.get("code", "")).strip()
+
+    if not access_code or not check_password_hash(
+        access.access_code_hash,
+        access_code
+    ):
+        return jsonify({"error": "Feil kode"}), 403
+
+    member = TournamentMember(
+        tournament_id=tid,
+        user_id=user_id
+    )
+
+    db.session.add(member)
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": "Du er nå med i serien"
+    }), 200
 @app.route('/api/tournaments/<int:tid>', methods=['GET'])
 def get_tournament(tid):
     tournament = Tournament.query.get(tid)

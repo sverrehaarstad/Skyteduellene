@@ -187,16 +187,21 @@ class Tournament(db.Model):
     name = db.Column(db.String(120), nullable=False)
     season = db.Column(db.String(50), default="")
 
-    def to_dict(self):
+      def to_dict(self):
         duel_count = DuelTournament.query.filter_by(
-    tournament_id=self.id
-).count()
+            tournament_id=self.id
+        ).count()
+
+        access = TournamentAccess.query.filter_by(
+            tournament_id=self.id
+        ).first()
 
         return {
             "id": self.id,
             "name": self.name,
             "season": self.season,
-            "duel_count": duel_count
+            "duel_count": duel_count,
+            "is_private": access.is_private if access else False
         }
 
 class TournamentAccess(db.Model):

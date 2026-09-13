@@ -467,11 +467,19 @@ def leaderboard():
         tips = Tip.query.filter_by(user_id=user.id).all()
         total_tips = len(tips)
 
-        point_records = PointRecord.query.filter_by(
+        latest_reset = get_latest_reset("global", "all")
+
+        point_query = PointRecord.query.filter_by(
             user_id=user.id,
             active=True
-        ).all()
+        )
 
+        if latest_reset:
+            point_query = point_query.filter(
+                PointRecord.created_at > latest_reset
+            )
+
+        point_records = point_query.all()
         points = sum(record.points for record in point_records)
         correct = points
 

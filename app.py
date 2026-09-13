@@ -354,9 +354,19 @@ def remove_duel_points(duel_id):
     if not duel:
         return jsonify({"error": "Duell ikke funnet"}), 404
 
+    status = DuelPointStatus.query.get(duel_id)
+
+    if not status:
+        status = DuelPointStatus(
+            duel_id=duel_id,
+            points_enabled=False
+        )
+        db.session.add(status)
+    else:
+        status.points_enabled = False
+
     point_records = PointRecord.query.filter_by(
-        duel_id=duel_id,
-        active=True
+        duel_id=duel_id
     ).all()
 
     for record in point_records:

@@ -253,6 +253,14 @@ def create_duel():
     if not data.get("shooter1") or not data.get("shooter2"):
         return jsonify({"error": "Begge navnene må fylles ut"}), 400
 
+    tournament_ids = data.get("tournament_ids")
+
+    if not isinstance(tournament_ids, list):
+        old_tournament_id = data.get("tournament_id", "")
+        tournament_ids = [old_tournament_id] if old_tournament_id else []
+
+    legacy_tournament_id = str(tournament_ids[0]) if tournament_ids else ""
+
     duel = Duel(
         shooter1=data.get("shooter1", ""),
         shooter2=data.get("shooter2", ""),
@@ -262,34 +270,26 @@ def create_duel():
         venue=data.get("venue", ""),
         start_time=data.get("start_time", ""),
         start_at=data.get("start_at", ""),
-        tournament_id=str(
-    (data.get("tournament_ids") or [data.get("tournament_id", "")])[0]
-)
+        tournament_id=legacy_tournament_id
     )
 
     db.session.add(duel)
-db.session.flush()
+    db.session.flush()
 
-tournament_ids = data.get("tournament_ids")
+    for tournament_id in tournament_ids:
+        try:
+            tournament_id = int(tournament_id)
+        except (TypeError, ValueError):
+            continue
 
-if not isinstance(tournament_ids, list):
-    old_tournament_id = data.get("tournament_id", "")
-    tournament_ids = [old_tournament_id] if old_tournament_id else []
+        db.session.add(DuelTournament(
+            duel_id=duel.id,
+            tournament_id=tournament_id
+        ))
 
-for tournament_id in tournament_ids:
-    try:
-        tournament_id = int(tournament_id)
-    except (TypeError, ValueError):
-        continue
+    db.session.commit()
 
-    db.session.add(DuelTournament(
-        duel_id=duel.id,
-        tournament_id=tournament_id
-    ))
-
-db.session.commit()
-
-return jsonify(duel.to_dict()), 201
+    return jsonify(duel.to_dict()), 201
 @app.route('/api/duels/<int:duel_id>/tip', methods=['POST', 'OPTIONS'])
 @jwt_required()
 def tip_duel(duel_id):

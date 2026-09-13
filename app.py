@@ -158,6 +158,12 @@ class DuelPointStatus(db.Model):
 
     duel_id = db.Column(db.Integer, primary_key=True)
     points_enabled = db.Column(db.Boolean, default=True)
+
+class DuelTournament(db.Model):
+    __tablename__ = 'duel_tournaments'
+
+    duel_id = db.Column(db.Integer, primary_key=True)
+    tournament_id = db.Column(db.Integer, primary_key=True)
 class Tournament(db.Model):
     __tablename__ = 'tournaments'
 

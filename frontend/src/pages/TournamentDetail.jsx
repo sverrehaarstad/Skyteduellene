@@ -37,8 +37,8 @@ const joinPrivateSeries = async (e) => {
     setData(response.data);
     setNeedsCode(false);
   } catch (err) {
-    alert("Feil kode");
-  }
+  setCodeError("Feil kode. Prøv igjen.");
+}
 };
   if (needsCode) {
   return (

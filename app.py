@@ -333,6 +333,36 @@ def save_duel_result(duel_id):
     db.session.commit()
 
     return jsonify(duel.to_dict()), 200
+
+@app.route('/api/duels/<int:duel_id>/remove-points', methods=['POST'])
+@jwt_required()
+def remove_duel_points(duel_id):
+    user_id = int(get_jwt_identity())
+    user = User.query.get(user_id)
+
+    if not user or get_role(user.email) != "admin":
+        return jsonify({"error": "Ingen tilgang"}), 403
+
+    duel = Duel.query.get(duel_id)
+
+    if not duel:
+        return jsonify({"error": "Duell ikke funnet"}), 404
+
+    point_records = PointRecord.query.filter_by(
+        duel_id=duel_id,
+        active=True
+    ).all()
+
+    for record in point_records:
+        record.active = False
+
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": "Poengene fra duellen er fjernet"
+    }), 200
+    
 @app.route('/api/my-tips', methods=['GET'])
 @jwt_required()
 def get_my_tips():

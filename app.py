@@ -349,16 +349,19 @@ def leaderboard():
 
     for user in users:
         tips = Tip.query.filter_by(user_id=user.id).all()
-
         total_tips = len(tips)
-        correct = 0
 
-        for tip in tips:
-            duel = Duel.query.get(tip.duel_id)
-            if duel and duel.status == "finished" and tip.pick == duel.outcome:
-                correct += 1
+        point_records = PointRecord.query.filter_by(
+            user_id=user.id,
+            active=True
+        ).all()
 
-        accuracy = round((correct / total_tips) * 100) if total_tips > 0 else 0
+        points = sum(record.points for record in point_records)
+        correct = points
+
+        accuracy = round(
+            (correct / total_tips) * 100
+        ) if total_tips > 0 else 0
 
         rows.append({
             "id": user.id,
@@ -366,7 +369,7 @@ def leaderboard():
             "correct": correct,
             "total_tips": total_tips,
             "accuracy": accuracy,
-            "points": correct
+            "points": points
         })
 
     rows.sort(key=lambda x: x["points"], reverse=True)

@@ -220,6 +220,13 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
                 <Plus size={16} /> Legg til
               </button>
             </form>
+            <button
+  type="button"
+  onClick={resetGlobalPoints}
+  className="mb-4 px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 text-sm font-bold rounded-lg transition-colors"
+>
+  Nullstill totalpoeng
+</button>
             {tournaments.length === 0 ? (
               <p className="text-slate-500 text-sm">Ingen serier ennå.</p>
             ) : (

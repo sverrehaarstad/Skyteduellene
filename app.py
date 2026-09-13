@@ -529,6 +529,18 @@ def leaderboard():
 
     return jsonify(rows), 200
 
+@app.route('/api/admin/users', methods=['GET'])
+@jwt_required()
+def get_admin_users():
+    user_id = int(get_jwt_identity())
+    user = User.query.get(user_id)
+
+    if not user or get_role(user.email) != "admin":
+        return jsonify({"error": "Ingen tilgang"}), 403
+
+    users = User.query.order_by(User.created_at.asc()).all()
+
+    return jsonify([user.to_dict() for user in users]), 200
 @app.route('/api/tournaments', methods=['GET'])
 def get_tournaments():
     tournaments = Tournament.query.order_by(Tournament.id.desc()).all()

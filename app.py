@@ -620,6 +620,36 @@ def get_tournament(tid):
     if not tournament:
         return jsonify({"error": "Fant ikke serien"}), 404
 
+    access = TournamentAccess.query.filter_by(
+        tournament_id=tid
+    ).first()
+
+    if access and access.is_private:
+        verify_jwt_in_request(optional=True)
+        identity = get_jwt_identity()
+
+        if not identity:
+            return jsonify({
+                "error": "Du må være logget inn for å se denne serien"
+            }), 401
+
+        user_id = int(identity)
+        user = User.query.get(user_id)
+
+        is_admin = (
+            user is not None
+            and get_role(user.email) == "admin"
+        )
+
+        member = TournamentMember.query.filter_by(
+            tournament_id=tid,
+            user_id=user_id
+        ).first()
+
+        if not is_admin and not member:
+            return jsonify({
+                "error": "Du må bli med i serien med kode først"
+            }), 403
     links = DuelTournament.query.filter_by(
         tournament_id=tid
     ).all()

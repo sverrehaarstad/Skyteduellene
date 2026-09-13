@@ -256,6 +256,15 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
 >
   Nullstill poeng
 </button>
+                    {t.season && (
+  <button
+    type="button"
+    onClick={() => resetPointsForSeason(t.season)}
+    className="px-2 py-1 text-xs font-bold text-slate-600 hover:text-[#D92525] border border-slate-200 rounded-full"
+  >
+    Nullstill sesong
+  </button>
+)}
                     <button onClick={() => removeSeason(t.id)} data-testid={`delete-season-${t.id}`} className="p-1 text-slate-400 hover:text-[#D92525] rounded-full"><Trash2 size={13} /></button>
                   </span>
                 ))}

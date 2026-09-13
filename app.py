@@ -311,7 +311,8 @@ def save_duel_result(duel_id):
     duel.score1 = str(data.get("score1", ""))
     duel.score2 = str(data.get("score2", ""))
     duel.status = "finished"
-    # Fjern eventuell gammel poengregistrering for denne duellen
+    
+# Fjern eventuell gammel poengregistrering for denne duellen
 PointRecord.query.filter_by(duel_id=duel.id).delete()
 
 # Lagre ett poeng til alle som tippet riktig

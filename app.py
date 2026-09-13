@@ -152,6 +152,12 @@ class PointRecord(db.Model):
     active = db.Column(db.Boolean, default=True)
 
     created_at = db.Column(db.DateTime, default=db.func.now())
+
+class DuelPointStatus(db.Model):
+    __tablename__ = 'duel_point_status'
+
+    duel_id = db.Column(db.Integer, primary_key=True)
+    points_enabled = db.Column(db.Boolean, default=True)
 class Tournament(db.Model):
     __tablename__ = 'tournaments'
 

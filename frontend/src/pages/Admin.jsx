@@ -231,6 +231,14 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
                 className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]" />
               <input data-testid="season-period" value={seasonForm.season} onChange={(e) => setSeasonForm({ ...seasonForm, season: e.target.value })} placeholder="Sesong (f.eks. 2026)"
                 className="w-full sm:w-40 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]" />
+              <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 px-2">
+  <input
+    type="checkbox"
+    checked={seasonForm.is_private}
+    onChange={(e) => setSeasonForm({ ...seasonForm, is_private: e.target.checked })}
+  />
+  Privat serie
+</label>
               <button data-testid="submit-season" className="px-4 py-2 bg-[#0F172A] hover:bg-slate-800 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5">
                 <Plus size={16} /> Legg til
               </button>

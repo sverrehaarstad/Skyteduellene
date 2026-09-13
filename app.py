@@ -281,6 +281,13 @@ def delete_tournament(tid):
     DuelTournament.query.filter_by(
         tournament_id=tid
     ).delete()
+    TournamentMember.query.filter_by(
+    tournament_id=tid
+).delete()
+
+TournamentAccess.query.filter_by(
+    tournament_id=tid
+).delete()
 
     db.session.delete(tournament)
     db.session.commit()

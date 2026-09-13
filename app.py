@@ -758,7 +758,7 @@ def get_tournament(tid):
 
     return jsonify({
         "tournament": tournament.to_dict(),
-                "duels": [duel.to_dict() for duel in visible_duels],
+        "duels": [duel.to_dict() for duel in visible_duels],
         "standings": standings,
         "winners": winners,
         "winner": winners[0] if winners else None,
@@ -984,35 +984,8 @@ def upload_image():
 def create_tables():
     db.create_all()
 
-    finished_duels = Duel.query.filter_by(status="finished").all()
-
-    changed = False
-
-    for duel in finished_duels:
-        correct_tips = Tip.query.filter_by(
-            duel_id=duel.id,
-            pick=duel.outcome
-        ).all()
-
-        for tip in correct_tips:
-            existing = PointRecord.query.filter_by(
-                user_id=tip.user_id,
-                duel_id=duel.id
-            ).first()
-
-            if not existing:
-                point_record = PointRecord(
-                    user_id=tip.user_id,
-                    duel_id=duel.id,
-                    points=1,
-                    shooter1=duel.shooter1,
-                    shooter2=duel.shooter2,
-                    active=True
-                )
-                db.session.add(point_record)
-                changed = True
-
-    for duel in Duel.query.all():
+changed = False
+for duel in Duel.query.all():
         if not duel.tournament_id:
             continue
 

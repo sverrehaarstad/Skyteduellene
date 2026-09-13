@@ -87,6 +87,13 @@ class Duel(db.Model):
     "X": Tip.query.filter_by(duel_id=self.id, pick="X").count(),
     "2": Tip.query.filter_by(duel_id=self.id, pick="2").count()
 }
+        tournament_links = DuelTournament.query.filter_by(
+            duel_id=self.id
+        ).all()
+
+        tournament_ids = [
+            link.tournament_id for link in tournament_links
+        ]
         return {
             "id": self.id,
             "tip_counts": tip_counts,
@@ -99,6 +106,7 @@ class Duel(db.Model):
             "start_time": self.start_time,
             "start_at": self.start_at,
             "tournament_id": self.tournament_id,
+            "tournament_ids": tournament_ids,
             "tournament_name": (
     Tournament.query.get(int(self.tournament_id)).name
     if self.tournament_id and Tournament.query.get(int(self.tournament_id))

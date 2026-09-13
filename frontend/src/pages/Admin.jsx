@@ -264,7 +264,7 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
               <div className="flex flex-wrap gap-2">
                 {tournaments.map((t) => (
                   <span key={t.id} className="flex items-center gap-2 bg-slate-100 rounded-full pl-3 pr-1.5 py-1 text-sm font-semibold text-slate-700" data-testid={`admin-season-${t.id}`}>
-                    {t.name}{t.season ? ` · ${t.season}` : ""} <span className="text-xs text-slate-400">({t.duel_count})</span>
+                    {t.name}{t.season ? ` · ${t.season}` : ""}{t.is_private ? " 🔒" : ""} <span className="text-xs text-slate-400">({t.duel_count})</span>
                     <button
   type="button"
   onClick={() => resetSeasonPoints(t.id)}

@@ -83,7 +83,7 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
     try {
       await api.post("/tournaments", seasonForm);
       toast.success("Sesong opprettet!");
-      setSeasonForm({ name: "", season: "" });
+      setSeasonForm({ name: "", season: "", is_private: false, access_code: "" });
       load();
     } catch (err) {
       toast.error(formatApiError(err.response?.data?.detail));

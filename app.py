@@ -242,12 +242,53 @@ def hello():
 
 @app.route('/api/duels', methods=['GET'])
 def get_duels():
-    duels = Duel.query.filter(
-    Duel.is_deleted == False,
-    Duel.status != "finished"
-).order_by(Duel.id.desc()).all()
-    return jsonify([duel.to_dict() for duel in duels])
+    verify_jwt_in_request(optional=True)
+    identity = get_jwt_identity()
 
+    user_id = int(identity) if identity else None
+    user = User.query.get(user_id) if user_id else None
+    is_admin = user is not None and get_role(user.email) == "admin"
+
+    duels = Duel.query.filter(
+        Duel.is_deleted == False,
+        Duel.status != "finished"
+    ).order_by(Duel.id.desc()).all()
+
+    visible_duels = []
+
+    for duel in duels:
+        links = DuelTournament.query.filter_by(
+            duel_id=duel.id
+        ).all()
+
+        private_tournament_ids = []
+
+        for link in links:
+            access = TournamentAccess.query.filter_by(
+                tournament_id=link.tournament_id
+            ).first()
+
+            if access and access.is_private:
+                private_tournament_ids.append(link.tournament_id)
+
+        if not private_tournament_ids:
+            visible_duels.append(duel)
+            continue
+
+        if is_admin:
+            visible_duels.append(duel)
+            continue
+
+        if user_id:
+            membership = TournamentMember.query.filter(
+                TournamentMember.user_id == user_id,
+                TournamentMember.tournament_id.in_(private_tournament_ids)
+            ).first()
+
+            if membership:
+                visible_duels.append(duel)
+
+    return jsonify([duel.to_dict() for duel in visible_duels])
 @app.route('/api/duels/<int:duel_id>', methods=['GET'])
 def get_duel(duel_id):
     duel = Duel.query.get(duel_id)

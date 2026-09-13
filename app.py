@@ -248,7 +248,7 @@ def get_duels():
 
     user_id = int(identity) if identity else None
     user = User.query.get(user_id) if user_id else None
-    is_admin = user is not None and get_role(user.email) == "admin"
+    is_admin = user is not None and get_role(user.username) == "admin"
 
     if is_admin:
         duels = Duel.query.filter(
@@ -324,7 +324,7 @@ def get_duel(duel_id):
         user_id = int(identity)
         user = User.query.get(user_id)
 
-        is_admin = user is not None and get_role(user.email) == "admin"
+        is_admin = user is not None and get_role(user.username) == "admin"
 
         membership = TournamentMember.query.filter(
             TournamentMember.user_id == user_id,
@@ -524,7 +524,7 @@ def remove_duel_points(duel_id):
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
 
-    if not user or get_role(user.email) != "admin":
+    if not user or get_role(user.username) != "admin":
         return jsonify({"error": "Ingen tilgang"}), 403
 
     duel = Duel.query.get(duel_id)
@@ -614,7 +614,7 @@ def get_admin_users():
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
 
-    if not user or get_role(user.email) != "admin":
+    if not user or get_role(user.username) != "admin":
         return jsonify({"error": "Ingen tilgang"}), 403
 
     users = User.query.order_by(User.created_at.asc()).all()
@@ -626,7 +626,7 @@ def delete_user(target_user_id):
     admin_id = int(get_jwt_identity())
     admin = User.query.get(admin_id)
 
-    if not admin or get_role(admin.email) != "admin":
+    if not admin or get_role(admin.username) != "admin":
         return jsonify({"error": "Ingen tilgang"}), 403
 
     if target_user_id == admin_id:
@@ -637,7 +637,7 @@ def delete_user(target_user_id):
     if not target_user:
         return jsonify({"error": "Bruker ikke funnet"}), 404
 
-    if get_role(target_user.email) == "admin":
+    if get_role(target_user.username) == "admin":
         return jsonify({"error": "Admin-kontoer kan ikke slettes"}), 400
 
     Tip.query.filter_by(user_id=target_user_id).delete()
@@ -772,7 +772,7 @@ def get_tournament(tid):
 
         is_admin = (
             user is not None
-            and get_role(user.email) == "admin"
+            and get_role(user.username) == "admin"
         )
 
         member = TournamentMember.query.filter_by(
@@ -805,7 +805,7 @@ def get_tournament(tid):
 
     for user in users:
         # Ikke vis admin i sesongtabellen
-        if get_role(user.email) == "admin":
+        if get_role(user.username) == "admin":
             continue
 
         tips = Tip.query.filter(
@@ -894,7 +894,7 @@ def reset_tournament_points(tid):
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
 
-    if not user or get_role(user.email) != "admin":
+    if not user or get_role(user.username) != "admin":
         return jsonify({"error": "Ingen tilgang"}), 403
 
     tournament = Tournament.query.get(tid)
@@ -921,7 +921,7 @@ def reset_global_points():
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
 
-    if not user or get_role(user.email) != "admin":
+    if not user or get_role(user.username) != "admin":
         return jsonify({"error": "Ingen tilgang"}), 403
 
     reset = ScoreReset(
@@ -942,7 +942,7 @@ def reset_season_points(season):
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
 
-    if not user or get_role(user.email) != "admin":
+    if not user or get_role(user.username) != "admin":
         return jsonify({"error": "Ingen tilgang"}), 403
 
     tournaments = Tournament.query.filter_by(
@@ -968,36 +968,37 @@ def reset_season_points(season):
 def register():
     if request.method == 'OPTIONS':
         return '', 204
-    
-    data = request.json
-    
-    # Validering
-    if not data.get('email') or '@' not in data.get('email', ''):
-        return jsonify({"error": "Gyldig e-post er påkrevd"}), 400
-    
-    if not data.get('password') or len(data.get('password', '')) < 6:
+
+    data = request.get_json() or {}
+
+    username = str(data.get('username', '')).strip()
+    password = data.get('password', '')
+
+    if not username:
+        return jsonify({"error": "Brukernavn er påkrevd"}), 400
+
+    if len(username) < 3:
+        return jsonify({"error": "Brukernavn må være minst 3 tegn"}), 400
+
+    if not password or len(password) < 6:
         return jsonify({"error": "Passord må være minst 6 tegn"}), 400
-    
-    # Sjekk om bruker allerede eksisterer
-    if User.query.filter_by(email=data['email']).first():
-        return jsonify({"error": "E-post er allerede i bruk"}), 400
-    
-    # Opprett ny bruker med navn eller email som username
-    username = data.get('name') or data['email'].split('@')[0]
+
     if User.query.filter_by(username=username).first():
-        username = f"{username}_{User.query.count()}"
-    
-    user = User(username=username, email=data['email'])
-    user.set_password(data['password'])
-    
+        return jsonify({"error": "Brukernavnet er allerede i bruk"}), 400
+
+    user = User(
+        username=username,
+        email=f"user-{User.query.count() + 1}@local.invalid"
+    )
+    user.set_password(password)
+
     db.session.add(user)
     db.session.commit()
-    
-    # Lag JWT token
+
     access_token = create_access_token(identity=str(user.id))
-    
+
     return jsonify({
-        "success": True, 
+        "success": True,
         "message": "Bruker opprettet!",
         "token": access_token,
         "user": user.to_dict()
@@ -1007,27 +1008,28 @@ def register():
 def login():
     if request.method == 'OPTIONS':
         return '', 204
-    
-    data = request.json
-    
-    if not data.get('email') or not data.get('password'):
-        return jsonify({"error": "E-post og passord er påkrevd"}), 400
-    
-    user = User.query.filter_by(email=data['email']).first()
-    
-    if not user or not user.check_password(data['password']):
-        return jsonify({"error": "Ugyldig e-post eller passord"}), 401
-    
-    # Lag JWT token
+
+    data = request.get_json() or {}
+
+    username = str(data.get('username', '')).strip()
+    password = data.get('password', '')
+
+    if not username or not password:
+        return jsonify({"error": "Brukernavn og passord er påkrevd"}), 400
+
+    user = User.query.filter_by(username=username).first()
+
+    if not user or not user.check_password(password):
+        return jsonify({"error": "Ugyldig brukernavn eller passord"}), 401
+
     access_token = create_access_token(identity=str(user.id))
-    
+
     return jsonify({
         "success": True,
         "message": "Innlogget!",
         "token": access_token,
         "user": user.to_dict()
     }), 200
-
 @app.route('/api/auth/me', methods=['GET', 'OPTIONS'])
 @jwt_required()
 def get_me():
@@ -1076,7 +1078,7 @@ def upload_image():
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
 
-    if not user or get_role(user.email) != "admin":
+    if not user or get_role(user.username) != "admin":
         return jsonify({"error": "Ingen tilgang"}), 403
 
     if "file" not in request.files:

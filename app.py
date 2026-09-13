@@ -763,7 +763,7 @@ def get_tournament(tid):
         "winners": winners,
         "winner": winners[0] if winners else None,
         "finished_count": finished_count,
-        "duel_count": len(duels)
+        "duel_count": len(all_duels)
     }), 200
 
 @app.route('/api/tournaments/<int:tid>/reset-points', methods=['POST'])

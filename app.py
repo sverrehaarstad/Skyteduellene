@@ -318,23 +318,44 @@ def save_duel_result(duel_id):
     duel.score2 = str(data.get("score2", ""))
     duel.status = "finished"
 
-    # Fjern eventuell gammel poengregistrering for denne duellen
-    PointRecord.query.filter_by(duel_id=duel.id).delete()
+    status = DuelPointStatus.query.get(duel.id)
+    points_enabled = True if not status else status.points_enabled
 
-    # Lagre ett poeng til alle som tippet riktig
     tips = Tip.query.filter_by(duel_id=duel.id).all()
 
-    for tip in tips:
-        if tip.pick == outcome:
-            point_record = PointRecord(
-                user_id=tip.user_id,
+    correct_user_ids = {
+        tip.user_id
+        for tip in tips
+        if tip.pick == outcome
+    }
+
+    existing_records = PointRecord.query.filter_by(
+        duel_id=duel.id
+    ).all()
+
+    existing_by_user = {
+        record.user_id: record
+        for record in existing_records
+    }
+
+    for record in existing_records:
+        if record.user_id in correct_user_ids:
+            record.points = 1
+            record.active = points_enabled
+        else:
+            record.points = 0
+            record.active = False
+
+    for user_id in correct_user_ids:
+        if user_id not in existing_by_user:
+            db.session.add(PointRecord(
+                user_id=user_id,
                 duel_id=duel.id,
                 points=1,
                 shooter1=duel.shooter1,
                 shooter2=duel.shooter2,
-                active=True
-            )
-            db.session.add(point_record)
+                active=points_enabled
+            ))
 
     db.session.commit()
 

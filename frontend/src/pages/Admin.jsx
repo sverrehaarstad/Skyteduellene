@@ -149,12 +149,31 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
             </div>
           </div>
           <div>
-            <label className="text-sm font-semibold text-slate-700">Serie / Sesong</label>
-            <select data-testid="duel-tournament" value={form.tournament_id} onChange={(e) => setForm({ ...form, tournament_id: e.target.value })}
-              className="mt-1 w-full px-3 py-2 border border-slate-200 rounded-lg bg-white focus:outline-none focus:border-[#D92525]">
-              <option value="">Ingen serie</option>
-              {tournaments.map((t) => <option key={t.id} value={t.id}>{t.name}{t.season ? ` (${t.season})` : ""}</option>)}
-            </select>
+            <label className="text-sm font-semibold text-slate-700">Serier / Sesonger</label>
+
+<div className="mt-2 space-y-2">
+  {tournaments.map((t) => (
+    <label key={t.id} className="flex items-center gap-2 text-sm text-slate-700">
+      <input
+        type="checkbox"
+        checked={form.tournament_ids.includes(t.id)}
+        onChange={(e) => {
+          const tournament_ids = e.target.checked
+            ? [...form.tournament_ids, t.id]
+            : form.tournament_ids.filter((id) => id !== t.id);
+
+          setForm({ ...form, tournament_ids });
+        }}
+      />
+      {t.name}{t.season ? ` (${t.season})` : ""}
+    </label>
+  ))}
+
+  {tournaments.length === 0 && (
+    <p className="text-sm text-slate-400">Ingen serier opprettet.</p>
+  )}
+</div>
+            
           </div>
           <button data-testid="submit-duel" disabled={busy} className="w-full py-2.5 bg-[#D92525] hover:bg-[#B91C1C] text-white font-bold rounded-lg transition-colors disabled:opacity-60">
             {busy ? "Oppretter..." : "Opprett duell"}

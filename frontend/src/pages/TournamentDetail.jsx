@@ -39,6 +39,34 @@ const joinPrivateSeries = async (e) => {
     alert("Feil kode");
   }
 };
+  if (needsCode) {
+  return (
+    <div className="max-w-md mx-auto px-4 py-16">
+      <div className="bg-white border border-slate-200 rounded-2xl p-6">
+        <h1 className="text-xl font-bold text-slate-900 mb-2">Privat serie 🔒</h1>
+        <p className="text-sm text-slate-500 mb-4">
+          Skriv inn koden for å bli med i serien.
+        </p>
+
+        <form onSubmit={joinPrivateSeries} className="space-y-3">
+          <input
+            value={accessCode}
+            onChange={(e) => setAccessCode(e.target.value)}
+            placeholder="Kode"
+            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]"
+          />
+
+          <button
+            type="submit"
+            className="w-full py-2.5 bg-[#D92525] hover:bg-[#B91C1C] text-white font-bold rounded-lg"
+          >
+            Bli med
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
   if (notFound) return <div className="max-w-2xl mx-auto px-4 py-16 text-slate-500">Fant ikke serien.</div>;
   if (!data) return <div className="max-w-2xl mx-auto px-4 py-16 text-slate-500">Laster...</div>;
 

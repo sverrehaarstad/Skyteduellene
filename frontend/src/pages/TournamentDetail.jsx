@@ -36,6 +36,7 @@ const joinPrivateSeries = async (e) => {
     const response = await api.get(`/tournaments/${id}`);
     setData(response.data);
     setNeedsCode(false);
+    setCodeError("");
   } catch (err) {
   setCodeError("Feil kode. Prøv igjen.");
 }

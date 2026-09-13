@@ -542,17 +542,13 @@ def get_tournament(tid):
         if not tips:
             continue
 
-        correct = 0
+        point_records = PointRecord.query.filter(
+            PointRecord.user_id == user.id,
+            PointRecord.duel_id.in_(duel_ids),
+            PointRecord.active == True
+        ).all() if duel_ids else []
 
-        for tip in tips:
-            duel = Duel.query.get(tip.duel_id)
-
-            if (
-                duel
-                and duel.status == "finished"
-                and tip.pick == duel.outcome
-            ):
-                correct += 1
+        correct = sum(record.points for record in point_records)
 
         total_tips = len(tips)
         accuracy = round(

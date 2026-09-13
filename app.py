@@ -515,16 +515,15 @@ def get_tournament(tid):
     if not tournament:
         return jsonify({"error": "Fant ikke serien"}), 404
 
-links = DuelTournament.query.filter_by(
-    tournament_id=tid
-).all()
+    links = DuelTournament.query.filter_by(
+        tournament_id=tid
+    ).all()
 
-duel_ids = [link.duel_id for link in links]
+    duel_ids = [link.duel_id for link in links]
 
-duels = Duel.query.filter(
-    Duel.id.in_(duel_ids)
-).order_by(Duel.id.desc()).all() if duel_ids else []
-
+    duels = Duel.query.filter(
+        Duel.id.in_(duel_ids)
+    ).order_by(Duel.id.desc()).all() if duel_ids else []
 
     standings = []
 

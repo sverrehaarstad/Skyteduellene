@@ -14,7 +14,15 @@ export default function TournamentDetail() {
   const [accessCode, setAccessCode] = useState("");
   
   useEffect(() => {
-    api.get(`/tournaments/${id}`).then(({ data }) => setData(data)).catch(() => setNotFound(true));
+   api.get(`/tournaments/${id}`)
+  .then(({ data }) => setData(data))
+  .catch((err) => {
+    if (err.response?.status === 403) {
+      setNeedsCode(true);
+    } else {
+      setNotFound(true);
+    }
+  });
   }, [id]);
 
   if (notFound) return <div className="max-w-2xl mx-auto px-4 py-16 text-slate-500">Fant ikke serien.</div>;

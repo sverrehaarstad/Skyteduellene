@@ -187,7 +187,7 @@ def hello():
 
 @app.route('/api/duels', methods=['GET'])
 def get_duels():
-    duels = Duel.query.order_by(Duel.id.desc()).all()
+    duels = Duel.query.filter_by(is_deleted=False).order_by(Duel.id.desc()).all()
     return jsonify([duel.to_dict() for duel in duels])
 
 @app.route('/api/duels/<int:duel_id>', methods=['GET'])

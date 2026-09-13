@@ -605,7 +605,7 @@ def join_tournament(tid):
         }), 200
 
     data = request.get_json() or {}
-    access_code = str(data.get("code", "")).strip()
+    access_code = str(data.get("access_code", "")).strip()
 
     if not access_code or not check_password_hash(
         access.access_code_hash,

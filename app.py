@@ -739,17 +739,12 @@ def get_tournament(tid):
         key=lambda row: (row["points"], row["correct"]),
         reverse=True
     )
-    finished_count = sum(
-    1 for duel in all_duels
-    if duel.status == "finished"
-)
+        finished_count = sum(
+        1 for duel in all_duels
+        if duel.status == "finished"
+    )
 
-all_done = len(all_duels) > 0 and finished_count == len(all_duels)
-
-all_done = len(all_duels) > 0 and finished_count == len(all_duels)
-
-all_done = len(all_duels) > 0 and finished_count == len(all_duels)
-    all_done = len(duels) > 0 and finished_count == len(duels)
+    all_done = len(all_duels) > 0 and finished_count == len(all_duels)
 
     winners = []
 

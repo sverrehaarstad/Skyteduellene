@@ -281,19 +281,19 @@ def delete_tournament(tid):
     DuelTournament.query.filter_by(
         tournament_id=tid
     ).delete()
-    TournamentMember.query.filter_by(
-    tournament_id=tid
-).delete()
 
-TournamentAccess.query.filter_by(
-    tournament_id=tid
-).delete()
+    TournamentMember.query.filter_by(
+        tournament_id=tid
+    ).delete()
+
+    TournamentAccess.query.filter_by(
+        tournament_id=tid
+    ).delete()
 
     db.session.delete(tournament)
     db.session.commit()
 
     return jsonify({"success": True}), 200
-
 @app.route('/api/duels', methods=['POST', 'OPTIONS'])
 def create_duel():
     if request.method == 'OPTIONS':

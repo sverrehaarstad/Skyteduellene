@@ -96,6 +96,19 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
     load();
   };
 
+    const resetSeasonPoints = async (id) => {
+    if (!window.confirm("Nullstille poengene i denne serien?")) {
+      return;
+    }
+
+    try {
+      await api.post(`/tournaments/${id}/reset-points`);
+      toast.success("Poengene i serien er nullstilt");
+      load();
+    } catch (err) {
+      toast.error(formatApiError(err.response?.data?.error || err.response?.data?.detail));
+    }
+  };
   const removeDuel = async (id) => {
     await api.delete(`/duels/${id}`);
     toast.success("Duell slettet");

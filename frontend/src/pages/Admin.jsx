@@ -214,6 +214,13 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
                 {tournaments.map((t) => (
                   <span key={t.id} className="flex items-center gap-2 bg-slate-100 rounded-full pl-3 pr-1.5 py-1 text-sm font-semibold text-slate-700" data-testid={`admin-season-${t.id}`}>
                     {t.name}{t.season ? ` · ${t.season}` : ""} <span className="text-xs text-slate-400">({t.duel_count})</span>
+                    <button
+  type="button"
+  onClick={() => resetSeasonPoints(t.id)}
+  className="px-2 py-1 text-xs font-bold text-slate-600 hover:text-[#D92525] border border-slate-200 rounded-full"
+>
+  Nullstill poeng
+</button>
                     <button onClick={() => removeSeason(t.id)} data-testid={`delete-season-${t.id}`} className="p-1 text-slate-400 hover:text-[#D92525] rounded-full"><Trash2 size={13} /></button>
                   </span>
                 ))}

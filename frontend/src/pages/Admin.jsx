@@ -355,13 +355,38 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
                     </p>
                     <p className="text-xs text-slate-400 truncate">{u.email}</p>
                   </div>
-                  {u.is_seed_admin ? (
-                    <span className="text-xs font-semibold text-slate-400 shrink-0">Hovedadmin</span>
-                  ) : u.role === "admin" ? (
-                    <button onClick={() => setRole(u.id, "user")} data-testid={`demote-${u.id}`} className="text-xs font-semibold text-slate-600 hover:text-[#D92525] border border-slate-200 rounded-full px-3 py-1.5 transition-colors shrink-0">Fjern admin</button>
-                  ) : (
-                    <button onClick={() => setRole(u.id, "admin")} data-testid={`promote-${u.id}`} className="text-xs font-bold text-white bg-[#D92525] hover:bg-[#B91C1C] rounded-full px-3 py-1.5 transition-colors shrink-0">Gjør til admin</button>
-                  )}
+<div className="flex items-center gap-2 shrink-0">
+  {u.is_seed_admin ? (
+    <span className="text-xs font-semibold text-slate-400">Hovedadmin</span>
+  ) : u.role === "admin" ? (
+    <button
+      onClick={() => setRole(u.id, "user")}
+      data-testid={`demote-${u.id}`}
+      className="text-xs font-semibold text-slate-600 hover:text-[#D92525] border border-slate-200 rounded-full px-3 py-1.5 transition-colors"
+    >
+      Fjern admin
+    </button>
+  ) : (
+    <>
+      <button
+        onClick={() => setRole(u.id, "admin")}
+        data-testid={`promote-${u.id}`}
+        className="text-xs font-bold text-white bg-[#D92525] hover:bg-[#B91C1C] rounded-full px-3 py-1.5 transition-colors"
+      >
+        Gjør til admin
+      </button>
+
+      <button
+        onClick={() => removeUser(u.id, u.name || u.username)}
+        data-testid={`delete-user-${u.id}`}
+        className="p-1.5 text-slate-400 hover:text-[#D92525] hover:bg-[#FEF2F2] rounded-md transition-colors"
+        title="Slett bruker"
+      >
+        <Trash2 size={16} />
+      </button>
+    </>
+  )}
+</div>
                 </div>
               ))}
             </div>

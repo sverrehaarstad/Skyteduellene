@@ -17,14 +17,16 @@ export default function TournamentDetail() {
   useEffect(() => {
    api.get(`/tournaments/${id}`)
   .then(({ data }) => setData(data))
-  .catch((err) => {
+    .catch((err) => {
     if (err.response?.status === 403) {
       setNeedsCode(true);
+    } else if (err.response?.status === 401) {
+      navigate("/login");
     } else {
       setNotFound(true);
     }
   });
-  }, [id]);
+}, [id, navigate]);
 const joinPrivateSeries = async (e) => {
   e.preventDefault();
 

@@ -736,8 +736,8 @@ def create_tables():
                 )
                 db.session.add(point_record)
                 changed = True
-                
-       for duel in Duel.query.all():
+
+    for duel in Duel.query.all():
         if not duel.tournament_id:
             continue
 
@@ -760,8 +760,5 @@ def create_tables():
 
     if changed:
         db.session.commit()
-    if changed:
-        db.session.commit()
-
 if __name__ == '__main__':
     app.run(debug=False)

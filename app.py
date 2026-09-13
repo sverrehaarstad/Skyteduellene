@@ -555,12 +555,23 @@ def get_tournament(tid):
 
         if not tips:
             continue
+               latest_reset = get_latest_reset("tournament", tid)
 
-        point_records = PointRecord.query.filter(
-            PointRecord.user_id == user.id,
-            PointRecord.duel_id.in_(duel_ids),
-            PointRecord.active == True
-        ).all() if duel_ids else []
+        point_records = []
+
+        if duel_ids:
+            point_query = PointRecord.query.filter(
+                PointRecord.user_id == user.id,
+                PointRecord.duel_id.in_(duel_ids),
+                PointRecord.active == True
+            )
+
+            if latest_reset:
+                point_query = point_query.filter(
+                    PointRecord.created_at > latest_reset
+                )
+
+            point_records = point_query.all()
 
         correct = sum(record.points for record in point_records)
 

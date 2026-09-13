@@ -240,11 +240,9 @@ def delete_tournament(tid):
     if not tournament:
         return jsonify({"error": "Serie ikke funnet"}), 404
 
-    duels = Duel.query.filter_by(tournament_id=str(tid)).all()
-
-    for duel in duels:
-        Tip.query.filter_by(duel_id=duel.id).delete()
-        db.session.delete(duel)
+    DuelTournament.query.filter_by(
+        tournament_id=tid
+    ).delete()
 
     db.session.delete(tournament)
     db.session.commit()

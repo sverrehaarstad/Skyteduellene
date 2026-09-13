@@ -1006,7 +1006,7 @@ for duel in Duel.query.all():
             ))
             changed = True
 
-    if changed:
+if changed:
         db.session.commit()
 if __name__ == '__main__':
     app.run(debug=False)

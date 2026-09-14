@@ -437,7 +437,7 @@ def tip_duel(duel_id):
     if not duel:
         return jsonify({"error": "Duell ikke funnet"}), 404
 
-        if duel.status == "finished":
+    if duel.status == "finished":
         return jsonify({"error": "Duellen er avsluttet"}), 400
 
     if duel.start_at:

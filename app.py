@@ -987,7 +987,7 @@ def register():
 
     user = User(
         username=username,
-        email=f"user-{User.query.count() + 1}@local.invalid"
+        email=f"user-{os.urandom(16).hex()}@local.invalid"
     )
     user.set_password(password)
 

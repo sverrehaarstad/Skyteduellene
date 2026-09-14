@@ -882,12 +882,11 @@ def get_tournament(tid):
         reverse=True
     )
     finished_count = sum(
-        1 for duel in all_duels
-        if duel.status == "finished"
-    )
+    1 for duel in visible_duels
+    if duel.status == "finished"
+)
 
-    all_done = len(all_duels) > 0 and finished_count == len(all_duels)
-
+all_done = len(visible_duels) > 0 and finished_count == len(visible_duels)
     winners = []
 
     if all_done and standings and standings[0]["points"] > 0:
@@ -905,7 +904,7 @@ def get_tournament(tid):
         "winners": winners,
         "winner": winners[0] if winners else None,
         "finished_count": finished_count,
-        "duel_count": len(all_duels)
+        "duel_count": len(visible_duels)
     }), 200
 
 @app.route('/api/tournaments/<int:tid>/reset-points', methods=['POST'])

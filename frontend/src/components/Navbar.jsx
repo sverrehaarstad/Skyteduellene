@@ -55,7 +55,7 @@ export const Navbar = () => {
                 <span className="font-mono font-bold text-sm">{user.points}</span>
                 <span className="text-xs text-slate-300">poeng</span>
               </div>
-              <span className="hidden lg:block text-sm font-semibold text-slate-700 max-w-[120px] truncate" data-testid="user-name">{user.name}</span>
+              <span className="hidden lg:block text-sm font-semibold text-slate-700 max-w-[120px] truncate" data-testid="user-name">{user.username}</span>
               <button
                 onClick={() => { logout(); navigate("/"); }}
                 data-testid="logout-btn"

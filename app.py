@@ -882,11 +882,12 @@ def get_tournament(tid):
         reverse=True
     )
     finished_count = sum(
-    1 for duel in visible_duels
-    if duel.status == "finished"
-)
+        1 for duel in visible_duels
+        if duel.status == "finished"
+    )
 
-all_done = len(visible_duels) > 0 and finished_count == len(visible_duels)
+    all_done = len(visible_duels) > 0 and finished_count == len(visible_duels)
+
     winners = []
 
     if all_done and standings and standings[0]["points"] > 0:

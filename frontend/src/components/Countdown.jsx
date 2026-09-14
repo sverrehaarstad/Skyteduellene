@@ -19,12 +19,12 @@ export const Countdown = ({ startAt, className = "" }) => {
   if (ms === null) return null;
 
   if (ms <= 0) {
-    return (
-      <span className={`inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#16A34A] ${className}`} data-testid="countdown-started">
-        <span className="w-2 h-2 rounded-full bg-[#16A34A] animate-pulse" /> I gang
-      </span>
-    );
-  }
+  return (
+    <span className={`inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-500 ${className}`} data-testid="countdown-started">
+      <span className="w-2 h-2 rounded-full bg-slate-400" /> Avsluttet
+    </span>
+  );
+}
 
   const s = Math.floor(ms / 1000);
   const d = Math.floor(s / 86400);

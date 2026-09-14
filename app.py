@@ -1106,7 +1106,17 @@ def upload_image():
 @app.before_request
 def create_tables():
     db.create_all()
+    
+    email_changed = False
 
+    for user in User.query.all():
+        if user.email and not user.email.endswith("@local.invalid"):
+            user.email = f"user-{user.id}@local.invalid"
+            email_changed = True
+
+    if email_changed:
+        db.session.commit()
+    
     changed = False
 
     for duel in Duel.query.all():

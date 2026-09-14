@@ -601,23 +601,23 @@ def leaderboard():
 
     for user in users:
         tips = (
-    Tip.query
-    .join(Duel, Tip.duel_id == Duel.id)
-    .filter(
-        Tip.user_id == user.id,
-        Duel.is_deleted == False
-    )
-    .all()
-)
+            Tip.query
+            .join(Duel, Tip.duel_id == Duel.id)
+            .filter(
+                Tip.user_id == user.id,
+                Duel.is_deleted == False
+            )
+            .all()
+        )
 
-total_tips = len(tips)
+        total_tips = len(tips)
 
-correct = sum(
-    1 for tip in tips
-    if tip.duel
-    and tip.duel.status == "finished"
-    and tip.pick == tip.duel.outcome
-)
+        correct = sum(
+            1 for tip in tips
+            if tip.duel
+            and tip.duel.status == "finished"
+            and tip.pick == tip.duel.outcome
+        )
 
         latest_reset = get_latest_reset("global", "all")
 
@@ -633,7 +633,6 @@ correct = sum(
 
         point_records = point_query.all()
         points = sum(record.points for record in point_records)
-        
 
         accuracy = round(
             (correct / total_tips) * 100
@@ -651,7 +650,6 @@ correct = sum(
     rows.sort(key=lambda x: x["points"], reverse=True)
 
     return jsonify(rows), 200
-
 @app.route('/api/admin/users', methods=['GET'])
 @jwt_required()
 def get_admin_users():

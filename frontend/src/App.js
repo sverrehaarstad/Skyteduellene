@@ -17,7 +17,7 @@ import TournamentDetail from "@/pages/TournamentDetail";
 
 
 
-
+function AppContent() {
   return (
     <>
       <Navbar />

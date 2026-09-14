@@ -110,7 +110,7 @@ export default function Results() {
                 <div
                   className={`text-left ${
                     d.outcome === "1"
-                      ? "font-black text-[#D92525]"
+                      ? "font-black text-amber-600"
                       : "font-semibold text-slate-700"
                   }`}
                 >
@@ -118,7 +118,16 @@ export default function Results() {
                     1
                   </span>
 
-                  {d.shooter1}
+                  <div className="flex items-center gap-2">
+  {d.shooter1_img && (
+    <img
+      src={d.shooter1_img}
+      alt={d.shooter1}
+      className="w-10 h-10 rounded-full object-cover border border-slate-200"
+    />
+  )}
+  <span>{d.shooter1}</span>
+</div>
 
                   <span className="block font-mono text-lg text-slate-900">
                     {d.score1 || "-"}
@@ -143,7 +152,7 @@ export default function Results() {
                 <div
                   className={`text-right ${
                     d.outcome === "2"
-                      ? "font-black text-[#D92525]"
+                      ? "font-black text-amber-600"
                       : "font-semibold text-slate-700"
                   }`}
                 >
@@ -151,7 +160,17 @@ export default function Results() {
                     2
                   </span>
 
-                  {d.shooter2}
+                  <div className="flex items-center justify-end gap-2">
+  <span>{d.shooter2}</span>
+
+  {d.shooter2_img && (
+    <img
+      src={d.shooter2_img}
+      alt={d.shooter2}
+      className="w-10 h-10 rounded-full object-cover border border-slate-200"
+    />
+  )}
+</div>
 
                   <span className="block font-mono text-lg text-slate-900">
                     {d.score2 || "-"}

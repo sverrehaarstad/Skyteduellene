@@ -401,7 +401,16 @@ function AdminDuelRow({ duel, onChanged, onRemove }) {
   const [score1, setScore1] = useState(duel.score1 || "");
   const [score2, setScore2] = useState(duel.score2 || "");
   const [busy, setBusy] = useState(false);
+  const isPastDeadline = duel.start_at
+  ? new Date() >= new Date(duel.start_at)
+  : false;
 
+const statusText =
+  duel.status === "finished"
+    ? "Avsluttet"
+    : isPastDeadline
+      ? "Venter på resultat"
+      : "Åpen";
   const save = async () => {
     if (!outcome) { toast.error("Velg et resultat"); return; }
     setBusy(true);
@@ -446,7 +455,7 @@ function AdminDuelRow({ duel, onChanged, onRemove }) {
         </div>
         <div className="flex items-center gap-2">
           <span className={`text-xs font-semibold px-2 py-1 rounded-full ${duel.status === "finished" ? "bg-slate-100 text-slate-600" : "bg-green-50 text-[#16A34A]"}`}>
-            {duel.status === "finished" ? "Avsluttet" : "Åpen"}
+            {statusText}
           </span>
           <button onClick={onRemove} data-testid={`delete-duel-${duel.id}`} className="p-1.5 text-slate-400 hover:text-[#D92525] hover:bg-[#FEF2F2] rounded-md transition-colors">
             <Trash2 size={16} />

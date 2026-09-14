@@ -7,8 +7,8 @@ import { Target } from "@/components/Target";
 export default function Register() {
   const { user, setSession } = useAuth();
   const navigate = useNavigate();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -20,7 +20,7 @@ export default function Register() {
     setBusy(true);
     setError("");
     try {
-      const { data } = await api.post("/auth/register", { name, email, password });
+      const { data } = await api.post("/auth/register", { username, password });
       setSession(data);
       navigate("/");
     } catch (err) {
@@ -41,15 +41,11 @@ export default function Register() {
         <form onSubmit={submit} className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4" data-testid="register-form">
           {error && <div className="text-sm text-[#D92525] bg-[#FEF2F2] border border-[#FCA5A5] rounded-lg px-3 py-2" data-testid="register-error">{error}</div>}
           <div>
-            <label className="text-sm font-semibold text-slate-700">Visningsnavn</label>
-            <input data-testid="register-name" required value={name} onChange={(e) => setName(e.target.value)}
+            <label className="text-sm font-semibold text-slate-700">Brukernavn</label>
+            <input data-testid="register-username" required value={username} onChange={(e) => setUsername(e.target.value)}
               className="mt-1 w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525] focus:ring-1 focus:ring-[#D92525]" />
           </div>
-          <div>
-            <label className="text-sm font-semibold text-slate-700">E-post</label>
-            <input data-testid="register-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 w-full px-3 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525] focus:ring-1 focus:ring-[#D92525]" />
-          </div>
+          
           <div>
             <label className="text-sm font-semibold text-slate-700">Passord (min. 6 tegn)</label>
             <input data-testid="register-password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)}

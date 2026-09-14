@@ -13,10 +13,12 @@ const PickButton = ({ label, sub, active, onClick, count, testid, disabled }) =>
     disabled={disabled}
     data-testid={testid}
     className={`flex-1 flex flex-col items-center justify-center py-3 rounded-lg border transition-colors duration-200 ${
-      active
-        ? "bg-[#D92525] border-[#D92525] text-white shadow-sm"
-        : "bg-white border-slate-200 text-slate-800 hover:border-[#FCA5A5] hover:bg-[#FEF2F2]"
-    }`}
+  disabled
+    ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
+    : active
+      ? "bg-[#D92525] border-[#D92525] text-white shadow-sm"
+      : "bg-white border-slate-200 text-slate-800 hover:border-[#FCA5A5] hover:bg-[#FEF2F2]"
+}`}
   >
     <span className="font-black text-lg leading-none" style={{ fontFamily: "Outfit, sans-serif" }}>{label}</span>
     <span className={`text-[10px] font-semibold uppercase tracking-wider mt-1 ${active ? "text-red-100" : "text-slate-500"}`}>{sub}</span>

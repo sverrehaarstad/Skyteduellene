@@ -582,7 +582,15 @@ def remove_duel_points(duel_id):
 def get_my_tips():
     user_id = int(get_jwt_identity())
 
-    tips = Tip.query.filter_by(user_id=user_id).all()
+    tips = (
+    Tip.query
+    .join(Duel, Tip.duel_id == Duel.id)
+    .filter(
+        Tip.user_id == user_id,
+        Duel.is_deleted == False
+    )
+    .all()
+)
 
     return jsonify([tip.to_dict() for tip in tips]), 200
 
@@ -592,8 +600,24 @@ def leaderboard():
     rows = []
 
     for user in users:
-        tips = Tip.query.filter_by(user_id=user.id).all()
-        total_tips = len(tips)
+        tips = (
+    Tip.query
+    .join(Duel, Tip.duel_id == Duel.id)
+    .filter(
+        Tip.user_id == user.id,
+        Duel.is_deleted == False
+    )
+    .all()
+)
+
+total_tips = len(tips)
+
+correct = sum(
+    1 for tip in tips
+    if tip.duel
+    and tip.duel.status == "finished"
+    and tip.pick == tip.duel.outcome
+)
 
         latest_reset = get_latest_reset("global", "all")
 
@@ -609,7 +633,7 @@ def leaderboard():
 
         point_records = point_query.all()
         points = sum(record.points for record in point_records)
-        correct = points
+        
 
         accuracy = round(
             (correct / total_tips) * 100

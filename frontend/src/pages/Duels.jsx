@@ -19,7 +19,8 @@ export default function Duels() {
       const { data } = await api.get("/duels", { params: { status: "open" } });
       // Håndter både array og object format
       const duelsList = Array.isArray(data) ? data : (data.dueller || []);
-      setDuels(duelsList);
+      const activeDuels = duelsList.filter((duel) => duel.status !== "finished");
+setDuels(activeDuels);
       if (user) {
         const res = await api.get("/my-tips");
         const map = {};

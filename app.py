@@ -1,7 +1,8 @@
 import cloudinary
 import cloudinary.uploader
 import os
-from datetime import timedelta
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -435,6 +436,26 @@ def tip_duel(duel_id):
     duel = Duel.query.get(duel_id)
     if not duel:
         return jsonify({"error": "Duell ikke funnet"}), 404
+
+        if duel.status == "finished":
+        return jsonify({"error": "Duellen er avsluttet"}), 400
+
+    if duel.start_at:
+        try:
+            start_time = datetime.fromisoformat(duel.start_at)
+
+            if start_time.tzinfo is None:
+                start_time = start_time.replace(
+                    tzinfo=ZoneInfo("Europe/Oslo")
+                )
+
+            if datetime.now(ZoneInfo("Europe/Oslo")) >= start_time:
+                return jsonify({
+                    "error": "Tippefristen for denne duellen har gått ut"
+                }), 400
+
+        except ValueError:
+            pass
 
     tip = Tip.query.filter_by(user_id=user_id, duel_id=duel_id).first()
 

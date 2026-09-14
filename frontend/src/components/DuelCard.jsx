@@ -106,7 +106,7 @@ export const DuelCard = ({ duel, myPick, onTipped }) => {
       {duel.start_at && (
         <div className="flex justify-center mb-4" data-testid={`countdown-wrap-${duel.id}`}>
           <div className="text-center">
-            <p className="text-[10px] uppercase tracking-wider text-slate-400 mb-0.5">Starter om</p>
+            <p className="text-[10px] uppercase tracking-wider text-slate-400 mb-0.5">Avsluttes om</p>
             <Countdown startAt={duel.start_at} className="text-sm" />
           </div>
         </div>

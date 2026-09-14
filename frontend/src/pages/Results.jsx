@@ -5,9 +5,14 @@ import { ListChecks } from "lucide-react";
 const outcomeLabel = (d) => {
   if (d.outcome === "1") return d.shooter1;
   if (d.outcome === "2") return d.shooter2;
-  return "Uavgjort";
-};
+  if (d.outcome === "X") return "Uavgjort";
 
+  const hasStarted = d.start_at
+    ? new Date() >= new Date(d.start_at)
+    : false;
+
+  return hasStarted ? "Venter på resultat" : "Live";
+};
 export default function Results() {
   const [duels, setDuels] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +52,9 @@ export default function Results() {
                   <span className="block font-mono text-lg text-slate-900">{d.score1 || "-"}</span>
                 </div>
                 <div className="text-center">
-                  <span className="text-[10px] uppercase tracking-wider text-slate-400 block">Vinner</span>
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400 block">
+  {d.outcome ? "Vinner" : "Status"}
+</span>
                   <span className="inline-block mt-1 px-3 py-1 rounded-full bg-[#0F172A] text-white text-sm font-bold" style={{ fontFamily: "Outfit, sans-serif" }}>
                     {outcomeLabel(d)}
                   </span>

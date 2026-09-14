@@ -30,8 +30,15 @@ export const DuelCard = ({ duel, myPick, onTipped }) => {
   const [saving, setSaving] = useState(false);
 
   const tc = duel.tip_counts || { "1": 0, X: 0, "2": 0 };
+  const isLocked = duel.start_at
+  ? new Date() >= new Date(duel.start_at)
+  : false;
 
   const handlePick = async (choice) => {
+    if (isLocked) {
+  toast.error("Tippefristen for denne duellen har gått ut");
+  return;
+}
     if (!user) {
       toast.error("Du må logge inn for å tippe");
       navigate("/login");

@@ -353,7 +353,6 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
                       {u.role === "admin" && <Crown size={13} className="text-[#EAB308] shrink-0" />}
                       {u.username}
                     </p>
-                    <p className="text-xs text-slate-400 truncate">{u.email}</p>
                   </div>
 <div className="flex items-center gap-2 shrink-0">
   {u.is_seed_admin ? (

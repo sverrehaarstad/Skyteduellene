@@ -7,9 +7,10 @@ import { MapPin, Clock, ChevronRight, Trophy } from "lucide-react";
 import { ShooterAvatar } from "@/components/ShooterAvatar";
 import { Countdown } from "@/components/Countdown";
 
-const PickButton = ({ label, sub, active, onClick, count, testid }) => (
+const PickButton = ({ label, sub, active, onClick, count, testid, disabled }) => (
   <button
     onClick={onClick}
+    disabled={disabled}
     data-testid={testid}
     className={`flex-1 flex flex-col items-center justify-center py-3 rounded-lg border transition-colors duration-200 ${
       active
@@ -63,10 +64,16 @@ export const DuelCard = ({ duel, myPick, onTipped }) => {
         <span className="text-xs font-semibold uppercase tracking-wider text-[#B91C1C] bg-[#FEF2F2] px-2.5 py-1 rounded-full">
           {duel.discipline}
         </span>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-[#16A34A] animate-pulse" />
-          <span className="text-xs font-semibold text-slate-500">Åpen for tipping</span>
-        </div>
+<div className="flex items-center gap-1.5">
+  <span
+    className={`w-2 h-2 rounded-full ${
+      isLocked ? "bg-slate-400" : "bg-[#16A34A] animate-pulse"
+    }`}
+  />
+  <span className="text-xs font-semibold text-slate-500">
+    {isLocked ? "Tipping stengt" : "Åpen for tipping"}
+  </span>
+</div>
       </div>
 
       {duel.tournament_name && (
@@ -104,9 +111,35 @@ export const DuelCard = ({ duel, myPick, onTipped }) => {
       )}
 
       <div className="flex gap-2">
-        <PickButton label="1" sub={duel.shooter1.split(" ")[0]} count={`${tc["1"]} tips`} active={pick === "1"} onClick={() => handlePick("1")} testid={`tip-1-${duel.id}`} />
-        <PickButton label="U" sub="Uavgjort" count={`${tc["X"]} tips`} active={pick === "X"} onClick={() => handlePick("X")} testid={`tip-X-${duel.id}`} />
-        <PickButton label="2" sub={duel.shooter2.split(" ")[0]} count={`${tc["2"]} tips`} active={pick === "2"} onClick={() => handlePick("2")} testid={`tip-2-${duel.id}`} />
+<PickButton
+  label="1"
+  sub={duel.shooter1.split(" ")[0]}
+  count={`${tc["1"]} tips`}
+  active={pick === "1"}
+  onClick={() => handlePick("1")}
+  disabled={isLocked}
+  testid={`tip-1-${duel.id}`}
+/>
+
+<PickButton
+  label="U"
+  sub="Uavgjort"
+  count={`${tc["X"]} tips`}
+  active={pick === "X"}
+  onClick={() => handlePick("X")}
+  disabled={isLocked}
+  testid={`tip-X-${duel.id}`}
+/>
+
+<PickButton
+  label="2"
+  sub={duel.shooter2.split(" ")[0]}
+  count={`${tc["2"]} tips`}
+  active={pick === "2"}
+  onClick={() => handlePick("2")}
+  disabled={isLocked}
+  testid={`tip-2-${duel.id}`}
+/>
       </div>
       {pick && <p className="text-center text-xs text-[#16A34A] font-semibold mt-3" data-testid={`my-pick-${duel.id}`}>Ditt tips er registrert{saving ? "..." : ""}</p>}
 

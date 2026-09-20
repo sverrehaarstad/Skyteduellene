@@ -88,11 +88,17 @@ export const DuelCard = ({ duel, myPick, onTipped }) => {
         <div className="flex-1 flex flex-col items-center text-center">
           <ShooterAvatar src={duel.shooter1_img} name={duel.shooter1} badge="1" />
           <Link to={`/skytter/${encodeURIComponent(duel.shooter1)}`} data-testid={`card-shooter1-${duel.id}`} className="font-bold text-slate-900 text-sm leading-tight mt-2 hover:text-[#D92525] transition-colors">{duel.shooter1}</Link>
+          {duel.shooter1_club && (
+  <p className="text-xs text-slate-500 mt-1">{duel.shooter1_club}</p>
+)}
         </div>
         <div className="text-slate-300 font-black text-sm" style={{ fontFamily: "Outfit, sans-serif" }}>VS</div>
         <div className="flex-1 flex flex-col items-center text-center">
           <ShooterAvatar src={duel.shooter2_img} name={duel.shooter2} badge="2" />
           <Link to={`/skytter/${encodeURIComponent(duel.shooter2)}`} data-testid={`card-shooter2-${duel.id}`} className="font-bold text-slate-900 text-sm leading-tight mt-2 hover:text-[#D92525] transition-colors">{duel.shooter2}</Link>
+          {duel.shooter2_club && (
+  <p className="text-xs text-slate-500 mt-1">{duel.shooter2_club}</p>
+)}
         </div>
       </div>
 

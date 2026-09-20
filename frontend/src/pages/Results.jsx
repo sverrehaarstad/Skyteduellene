@@ -126,7 +126,20 @@ export default function Results() {
       className="w-10 h-10 rounded-full object-cover border border-slate-200"
     />
   )}
-  <span>{d.shooter1}</span>
+
+  <div>
+    <span className="block">{d.shooter1}</span>
+    {d.shooter1_club && (
+      <span className="block text-xs font-normal text-slate-500">
+        {d.shooter1_club}
+      </span>
+    )}
+    {d.shooter1_class && (
+      <span className="block text-xs font-normal text-slate-500">
+        Klasse {d.shooter1_class}
+      </span>
+    )}
+  </div>
 </div>
 
                   <span className="block font-mono text-lg text-slate-900">
@@ -160,8 +173,20 @@ export default function Results() {
                     2
                   </span>
 
-                  <div className="flex items-center justify-end gap-2">
-  <span>{d.shooter2}</span>
+<div className="flex items-center justify-end gap-2">
+  <div className="text-right">
+    <span className="block">{d.shooter2}</span>
+    {d.shooter2_club && (
+      <span className="block text-xs font-normal text-slate-500">
+        {d.shooter2_club}
+      </span>
+    )}
+    {d.shooter2_class && (
+      <span className="block text-xs font-normal text-slate-500">
+        Klasse {d.shooter2_class}
+      </span>
+    )}
+  </div>
 
   {d.shooter2_img && (
     <img
@@ -171,7 +196,6 @@ export default function Results() {
     />
   )}
 </div>
-
                   <span className="block font-mono text-lg text-slate-900">
                     {d.score2 || "-"}
                   </span>

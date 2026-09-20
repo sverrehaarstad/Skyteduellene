@@ -197,9 +197,15 @@ class Tournament(db.Model):
     season = db.Column(db.String(50), default="")
 
     def to_dict(self):
-        duel_count = DuelTournament.query.filter_by(
-            tournament_id=self.id
-        ).count()
+        duel_count = (
+    DuelTournament.query
+    .join(Duel, DuelTournament.duel_id == Duel.id)
+    .filter(
+        DuelTournament.tournament_id == self.id,
+        Duel.is_deleted == False
+    )
+    .count()
+)
 
         access = TournamentAccess.query.filter_by(
             tournament_id=self.id

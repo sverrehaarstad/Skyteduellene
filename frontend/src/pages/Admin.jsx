@@ -14,7 +14,19 @@ export default function Admin() {
   const [tournaments, setTournaments] = useState([]);
   const [users, setUsers] = useState([]);
   const [heroInput, setHeroInput] = useState("");
-  const [form, setForm] = useState({ shooter1: "", shooter2: "", shooter1_img: "", shooter2_img: "", discipline: DISCIPLINES[0], venue: "", start_time: "", start_at: "", tournament_ids: [] });
+  const [form, setForm] = useState({
+  shooter1: "",
+  shooter2: "",
+  shooter1_club: "",
+  shooter2_club: "",
+  shooter1_img: "",
+  shooter2_img: "",
+  discipline: DISCIPLINES[0],
+  venue: "",
+  start_time: "",
+  start_at: "",
+  tournament_ids: []
+});
   const [seasonForm, setSeasonForm] = useState({ name: "", season: "", is_private: false, access_code: "" });
   const [duelTab, setDuelTab] = useState("active");
   const [busy, setBusy] = useState(false);
@@ -81,7 +93,19 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
     try {
       await api.post("/duels", form);
       toast.success("Duell opprettet!");
-      setForm({ shooter1: "", shooter2: "", shooter1_img: "", shooter2_img: "", discipline: DISCIPLINES[0], venue: "", start_time: "", start_at: "", tournament_ids: [] });
+      setForm({
+  shooter1: "",
+  shooter2: "",
+  shooter1_club: "",
+  shooter2_club: "",
+  shooter1_img: "",
+  shooter2_img: "",
+  discipline: DISCIPLINES[0],
+  venue: "",
+  start_time: "",
+  start_at: "",
+  tournament_ids: []
+});
       load();
     } catch (err) {
       toast.error(formatApiError(err.response?.data?.detail));
@@ -171,6 +195,12 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
             <label className="text-sm font-semibold text-slate-700">Skytter 1</label>
             <input data-testid="duel-shooter1" required value={form.shooter1} onChange={(e) => setForm({ ...form, shooter1: e.target.value })}
               className="mt-1 w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]" />
+            <input
+  value={form.shooter1_club}
+  onChange={(e) => setForm({ ...form, shooter1_club: e.target.value })}
+  placeholder="Skytterlag"
+  className="mt-2 w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]"
+/>
             <div className="mt-2">
               <ImageUpload value={form.shooter1_img} onChange={(url) => setForm({ ...form, shooter1_img: url })} testid="duel-shooter1-img" label="Last opp bilde av skytter 1" />
             </div>
@@ -179,6 +209,12 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
             <label className="text-sm font-semibold text-slate-700">Skytter 2</label>
             <input data-testid="duel-shooter2" required value={form.shooter2} onChange={(e) => setForm({ ...form, shooter2: e.target.value })}
               className="mt-1 w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]" />
+            <input
+  value={form.shooter2_club}
+  onChange={(e) => setForm({ ...form, shooter2_club: e.target.value })}
+  placeholder="Skytterlag"
+  className="mt-2 w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]"
+/>
             <div className="mt-2">
               <ImageUpload value={form.shooter2_img} onChange={(url) => setForm({ ...form, shooter2_img: url })} testid="duel-shooter2-img" label="Last opp bilde av skytter 2" />
             </div>

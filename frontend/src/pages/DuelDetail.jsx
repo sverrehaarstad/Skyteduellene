@@ -62,7 +62,6 @@ export default function DuelDetail() {
   const isOpen = duel.status === "open";
   const tc = duel.tip_counts || { "1": 0, X: 0, "2": 0 };
   const totalTips = tc["1"] + tc["X"] + tc["2"];
-  ];
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6" data-testid="duel-detail">

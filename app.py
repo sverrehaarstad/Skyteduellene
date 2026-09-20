@@ -71,6 +71,8 @@ class Duel(db.Model):
     shooter2 = db.Column(db.String(120), nullable=False)
     shooter1_club = db.Column(db.String(120), default="")
     shooter2_club = db.Column(db.String(120), default="")
+    shooter1_class = db.Column(db.String(30), default="")
+    shooter2_class = db.Column(db.String(30), default="")
     shooter1_img = db.Column(db.Text, default="")
     shooter2_img = db.Column(db.Text, default="")
     discipline = db.Column(db.String(80), default="")
@@ -104,6 +106,8 @@ class Duel(db.Model):
             "shooter2": self.shooter2,
             "shooter1_club": self.shooter1_club,
             "shooter2_club": self.shooter2_club,
+            "shooter1_class": self.shooter1_class,
+            "shooter2_class": self.shooter2_class,
             "shooter1_img": self.shooter1_img,
             "shooter2_img": self.shooter2_img,
             "discipline": self.discipline,
@@ -400,6 +404,8 @@ def create_duel():
         shooter2=data.get("shooter2", ""),
         shooter1_club=data.get("shooter1_club", ""),
         shooter2_club=data.get("shooter2_club", ""),
+        shooter1_class=data.get("shooter1_class", ""),
+        shooter2_class=data.get("shooter2_class", ""),
         shooter1_img=data.get("shooter1_img", ""),
         shooter2_img=data.get("shooter2_img", ""),
         discipline=data.get("discipline", ""),

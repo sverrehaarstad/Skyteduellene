@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { ShooterAvatar } from "@/components/ShooterAvatar";
 import { Countdown } from "@/components/Countdown";
 import { toast } from "sonner";
-import { ArrowLeft, MapPin, Clock, BarChart3, Check, Share2, Trophy } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, Check, Share2, Trophy } from "lucide-react";
 
 const outcomeLabel = (d) =>
   d.outcome === "1" ? d.shooter1 : d.outcome === "2" ? d.shooter2 : "Uavgjort";
@@ -59,15 +59,9 @@ export default function DuelDetail() {
   );
   if (!duel) return <div className="max-w-2xl mx-auto px-4 py-16 text-slate-500">Laster...</div>;
 
-  const tc = duel.tip_counts || { "1": 0, X: 0, "2": 0 };
-  const total = tc["1"] + tc["X"] + tc["2"];
-  const pct = (n) => (total ? Math.round((n / total) * 100) : 0);
   const isOpen = duel.status === "open";
-
-  const bars = [
-    { key: "1", label: duel.shooter1, sub: "Skytter 1", n: tc["1"] },
-    { key: "X", label: "Uavgjort", sub: "Uavgjort", n: tc["X"] },
-    { key: "2", label: duel.shooter2, sub: "Skytter 2", n: tc["2"] },
+  const tc = duel.tip_counts || { "1": 0, X: 0, "2": 0 };
+  const totalTips = tc["1"] + tc["X"] + tc["2"];
   ];
 
   return (
@@ -97,10 +91,13 @@ export default function DuelDetail() {
           <div className="flex-1 flex flex-col items-center text-center">
             <ShooterAvatar src={duel.shooter1_img} name={duel.shooter1} badge="1" size="lg" />
             <Link to={`/skytter/${encodeURIComponent(duel.shooter1)}`} data-testid="shooter1-link" className="font-bold text-slate-900 mt-3 hover:text-[#D92525] transition-colors">
-  {duel.shooter1}{duel.shooter1_class ? ` ${duel.shooter1_class}` : ""}
+  {duel.shooter1}
 </Link>
-            {duel.shooter1_club && (
+{duel.shooter1_club && (
   <p className="text-sm text-slate-500 mt-1">{duel.shooter1_club}</p>
+)}
+{duel.shooter1_class && (
+  <p className="text-sm text-slate-500">Klasse {duel.shooter1_class}</p>
 )}
             {!isOpen && <p className="font-mono text-2xl text-slate-900 mt-1">{duel.score1 || "-"}</p>}
           </div>
@@ -108,10 +105,13 @@ export default function DuelDetail() {
           <div className="flex-1 flex flex-col items-center text-center">
             <ShooterAvatar src={duel.shooter2_img} name={duel.shooter2} badge="2" size="lg" />
             <Link to={`/skytter/${encodeURIComponent(duel.shooter2)}`} data-testid="shooter2-link" className="font-bold text-slate-900 mt-3 hover:text-[#D92525] transition-colors">
-  {duel.shooter2}{duel.shooter2_class ? ` ${duel.shooter2_class}` : ""}
+  {duel.shooter2}
 </Link>
-            {duel.shooter2_club && (
+{duel.shooter2_club && (
   <p className="text-sm text-slate-500 mt-1">{duel.shooter2_club}</p>
+)}
+{duel.shooter2_class && (
+  <p className="text-sm text-slate-500">Klasse {duel.shooter2_class}</p>
 )}
             {!isOpen && <p className="font-mono text-2xl text-slate-900 mt-1">{duel.score2 || "-"}</p>}
           </div>
@@ -139,6 +139,11 @@ export default function DuelDetail() {
             </span>
           </div>
         )}
+        <div className="text-center mt-4">
+  <p className="text-sm text-slate-500">
+    Total tips: <span className="font-semibold text-slate-700">{totalTips}</span>
+  </p>
+</div>
 
         {/* Tipping */}
         {isOpen && (
@@ -157,23 +162,7 @@ export default function DuelDetail() {
         {myPick && isOpen && <p className="text-center text-xs text-[#16A34A] font-semibold mt-3 flex items-center justify-center gap-1"><Check size={12} /> Ditt tips er registrert</p>}
       </div>
 
-      {/* Tip distribution */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 mt-5" data-testid="tip-distribution">
-        <h2 className="flex items-center gap-2 font-bold text-slate-900 mb-4"><BarChart3 size={18} className="text-[#D92525]" /> Tippefordeling ({total} tips)</h2>
-        <div className="space-y-4">
-          {bars.map((b) => (
-            <div key={b.key}>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="font-semibold text-slate-700"><span className="font-mono text-slate-400 mr-1.5">{b.key === "X" ? "U" : b.key}</span>{b.label}</span>
-                <span className="font-mono text-slate-500">{pct(b.n)}% · {b.n}</span>
-              </div>
-              <div className="h-2.5 rounded-full bg-slate-100 overflow-hidden">
-                <div className="h-full rounded-full bg-[#D92525] transition-[width] duration-500" style={{ width: `${pct(b.n)}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+
     </div>
   );
 }

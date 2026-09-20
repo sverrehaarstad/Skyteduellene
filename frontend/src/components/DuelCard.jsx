@@ -22,7 +22,6 @@ const PickButton = ({ label, sub, active, onClick, count, testid, disabled }) =>
   >
     <span className="font-black text-lg leading-none" style={{ fontFamily: "Outfit, sans-serif" }}>{label}</span>
     <span className={`text-[10px] font-semibold uppercase tracking-wider mt-1 ${active ? "text-red-100" : "text-slate-500"}`}>{sub}</span>
-    <span className={`text-[11px] font-mono mt-0.5 ${active ? "text-white" : "text-slate-500"}`}>{count}</span>
   </button>
 );
 
@@ -33,6 +32,7 @@ export const DuelCard = ({ duel, myPick, onTipped }) => {
   const [saving, setSaving] = useState(false);
 
   const tc = duel.tip_counts || { "1": 0, X: 0, "2": 0 };
+  const totalTips = tc["1"] + tc["X"] + tc["2"];
   const isLocked = duel.start_at
   ? new Date() >= new Date(duel.start_at)
   : false;
@@ -87,21 +87,27 @@ export const DuelCard = ({ duel, myPick, onTipped }) => {
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex-1 flex flex-col items-center text-center">
           <ShooterAvatar src={duel.shooter1_img} name={duel.shooter1} badge="1" />
-          <Link to={`/skytter/${encodeURIComponent(duel.shooter1)}`} data-testid={`card-shooter1-${duel.id}`} className="font-bold text-slate-900 text-sm leading-tight mt-2 hover:text-[#D92525] transition-colors">
-  {duel.shooter1}{duel.shooter1_class ? ` ${duel.shooter1_class}` : ""}
+         <Link to={`/skytter/${encodeURIComponent(duel.shooter1)}`} data-testid={`card-shooter1-${duel.id}`} className="font-bold text-slate-900 text-sm leading-tight mt-2 hover:text-[#D92525] transition-colors">
+  {duel.shooter1}
 </Link>
-          {duel.shooter1_club && (
+{duel.shooter1_club && (
   <p className="text-xs text-slate-500 mt-1">{duel.shooter1_club}</p>
+)}
+{duel.shooter1_class && (
+  <p className="text-xs text-slate-500">Klasse {duel.shooter1_class}</p>
 )}
         </div>
         <div className="text-slate-300 font-black text-sm" style={{ fontFamily: "Outfit, sans-serif" }}>VS</div>
         <div className="flex-1 flex flex-col items-center text-center">
           <ShooterAvatar src={duel.shooter2_img} name={duel.shooter2} badge="2" />
           <Link to={`/skytter/${encodeURIComponent(duel.shooter2)}`} data-testid={`card-shooter2-${duel.id}`} className="font-bold text-slate-900 text-sm leading-tight mt-2 hover:text-[#D92525] transition-colors">
-  {duel.shooter2}{duel.shooter2_class ? ` ${duel.shooter2_class}` : ""}
+  {duel.shooter2}
 </Link>
-          {duel.shooter2_club && (
+{duel.shooter2_club && (
   <p className="text-xs text-slate-500 mt-1">{duel.shooter2_club}</p>
+)}
+{duel.shooter2_class && (
+  <p className="text-xs text-slate-500">Klasse {duel.shooter2_class}</p>
 )}
         </div>
       </div>
@@ -121,7 +127,11 @@ export const DuelCard = ({ duel, myPick, onTipped }) => {
           </div>
         </div>
       )}
-
+<div className="text-center mb-3">
+  <p className="text-xs text-slate-500">
+    Total tips: <span className="font-semibold text-slate-700">{totalTips}</span>
+  </p>
+</div>
       <div className="flex gap-2">
 <PickButton
   label="1"

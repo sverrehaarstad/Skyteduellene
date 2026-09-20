@@ -69,6 +69,8 @@ class Duel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     shooter1 = db.Column(db.String(120), nullable=False)
     shooter2 = db.Column(db.String(120), nullable=False)
+    shooter1_club = db.Column(db.String(120), default="")
+    shooter2_club = db.Column(db.String(120), default="")
     shooter1_img = db.Column(db.Text, default="")
     shooter2_img = db.Column(db.Text, default="")
     discipline = db.Column(db.String(80), default="")
@@ -100,6 +102,8 @@ class Duel(db.Model):
             "tip_counts": tip_counts,
             "shooter1": self.shooter1,
             "shooter2": self.shooter2,
+            "shooter1_club": self.shooter1_club,
+            "shooter2_club": self.shooter2_club,
             "shooter1_img": self.shooter1_img,
             "shooter2_img": self.shooter2_img,
             "discipline": self.discipline,
@@ -394,6 +398,8 @@ def create_duel():
     duel = Duel(
         shooter1=data.get("shooter1", ""),
         shooter2=data.get("shooter2", ""),
+        shooter1_club=data.get("shooter1_club", ""),
+        shooter2_club=data.get("shooter2_club", ""),
         shooter1_img=data.get("shooter1_img", ""),
         shooter2_img=data.get("shooter2_img", ""),
         discipline=data.get("discipline", ""),

@@ -149,9 +149,34 @@ const joinPrivateSeries = async (e) => {
         {duels.map((d) => (
           <Link key={d.id} to={`/duell/${d.id}`} className="flex items-center justify-between bg-white border border-slate-200 rounded-xl p-4 hover:border-[#FCA5A5] transition-colors">
             <div>
-              <span className="text-xs text-[#B91C1C] font-semibold uppercase tracking-wider">{d.discipline}</span>
-              <p className="font-bold text-slate-900 text-sm">{d.shooter1} vs {d.shooter2}</p>
-            </div>
+  <span className="text-xs text-[#B91C1C] font-semibold uppercase tracking-wider">
+    {d.discipline}
+  </span>
+
+  <div className="flex items-start gap-3 mt-1">
+    <div>
+      <p className="font-bold text-slate-900 text-sm">{d.shooter1}</p>
+      {d.shooter1_club && (
+        <p className="text-xs text-slate-500">{d.shooter1_club}</p>
+      )}
+      {d.shooter1_class && (
+        <p className="text-xs text-slate-500">Klasse {d.shooter1_class}</p>
+      )}
+    </div>
+
+    <span className="text-sm text-slate-400 font-semibold mt-0.5">vs</span>
+
+    <div>
+      <p className="font-bold text-slate-900 text-sm">{d.shooter2}</p>
+      {d.shooter2_club && (
+        <p className="text-xs text-slate-500">{d.shooter2_club}</p>
+      )}
+      {d.shooter2_class && (
+        <p className="text-xs text-slate-500">Klasse {d.shooter2_class}</p>
+      )}
+    </div>
+  </div>
+</div>
             <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${d.status === "finished" ? "bg-slate-100 text-slate-600" : "bg-green-50 text-[#16A34A]"}`}>
               {d.status === "finished" ? "Avsluttet" : "Åpen"}
             </span>

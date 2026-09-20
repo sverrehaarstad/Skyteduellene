@@ -15,12 +15,14 @@ export default function Admin() {
   const [users, setUsers] = useState([]);
   const [heroInput, setHeroInput] = useState("");
   const [form, setForm] = useState({
-  shooter1: "",
-  shooter2: "",
-  shooter1_club: "",
-  shooter2_club: "",
-  shooter1_img: "",
-  shooter2_img: "",
+shooter1: "",
+shooter2: "",
+shooter1_club: "",
+shooter2_club: "",
+shooter1_class: "",
+shooter2_class: "",
+shooter1_img: "",
+shooter2_img: "",
   discipline: DISCIPLINES[0],
   venue: "",
   start_time: "",
@@ -94,12 +96,14 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
       await api.post("/duels", form);
       toast.success("Duell opprettet!");
       setForm({
-  shooter1: "",
-  shooter2: "",
-  shooter1_club: "",
-  shooter2_club: "",
-  shooter1_img: "",
-  shooter2_img: "",
+shooter1: "",
+shooter2: "",
+shooter1_club: "",
+shooter2_club: "",
+shooter1_class: "",
+shooter2_class: "",
+shooter1_img: "",
+shooter2_img: "",
   discipline: DISCIPLINES[0],
   venue: "",
   start_time: "",
@@ -201,6 +205,12 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
   placeholder="Skytterlag"
   className="mt-2 w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]"
 />
+            <input
+  value={form.shooter1_class}
+  onChange={(e) => setForm({ ...form, shooter1_class: e.target.value })}
+  placeholder="Klasse"
+  className="mt-2 w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]"
+/>
             <div className="mt-2">
               <ImageUpload value={form.shooter1_img} onChange={(url) => setForm({ ...form, shooter1_img: url })} testid="duel-shooter1-img" label="Last opp bilde av skytter 1" />
             </div>
@@ -213,6 +223,12 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
   value={form.shooter2_club}
   onChange={(e) => setForm({ ...form, shooter2_club: e.target.value })}
   placeholder="Skytterlag"
+  className="mt-2 w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]"
+/>
+            <input
+  value={form.shooter2_class}
+  onChange={(e) => setForm({ ...form, shooter2_class: e.target.value })}
+  placeholder="Klasse"
   className="mt-2 w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]"
 />
             <div className="mt-2">

@@ -25,7 +25,7 @@ export default function DuelDetail() {
       setDuel(data);
       if (user) {
         const res = await api.get("/my-tips");
-        const mine = res.data.find((t) => t.duel.id === id);
+        const mine = res.data.find((t) => t.duel.id === Number(id));
         setMyPick(mine ? mine.pick : null);
       }
     } catch {

@@ -61,7 +61,22 @@ useEffect(() => {
       setSaving(false);
     }
   };
+  const handleDeleteTip = async () => {
+    if (!pick || isLocked) return;
 
+  setSaving(true);
+
+  try {
+    await api.delete(`/duels/${duel.id}/tip`);
+    setPick(null);
+    toast.success("Tipset er slettet");
+    onTipped && onTipped();
+  } catch (e) {
+    toast.error(formatApiError(e.response?.data?.error));
+  } finally {
+    setSaving(false);
+  }
+};
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-5 hover:border-[#FCA5A5] transition-colors duration-200" data-testid={`duel-card-${duel.id}`}>
       <div className="flex items-center justify-between mb-4">
@@ -165,7 +180,27 @@ useEffect(() => {
   testid={`tip-2-${duel.id}`}
 />
       </div>
-      {pick && <p className="text-center text-xs text-[#16A34A] font-semibold mt-3" data-testid={`my-pick-${duel.id}`}>Ditt tips er registrert{saving ? "..." : ""}</p>}
+      {pick && (
+  <div className="text-center mt-3">
+    <p
+      className="text-xs text-[#16A34A] font-semibold"
+      data-testid={`my-pick-${duel.id}`}
+    >
+      Ditt tips er registrert{saving ? "..." : ""}
+    </p>
+
+    {!isLocked && (
+      <button
+        type="button"
+        onClick={handleDeleteTip}
+        disabled={saving}
+        className="mt-1 text-xs font-semibold text-slate-400 hover:text-[#D92525] transition-colors disabled:opacity-50"
+      >
+        Slett tips
+      </button>
+    )}
+  </div>
+)}
 
       <Link to={`/duell/${duel.id}`} data-testid={`detail-link-${duel.id}`} className="mt-3 flex items-center justify-center gap-1 text-xs font-semibold text-slate-500 hover:text-[#D92525] transition-colors">
         Se detaljer & fordeling <ChevronRight size={13} />

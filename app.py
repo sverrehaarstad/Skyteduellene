@@ -864,10 +864,6 @@ def get_tournament(tid):
     users = User.query.all()
 
     for user in users:
-        # Ikke vis admin i sesongtabellen
-        if get_role(user.username) == "admin":
-            continue
-
         tips = Tip.query.filter(
             Tip.user_id == user.id,
             Tip.duel_id.in_(duel_ids)

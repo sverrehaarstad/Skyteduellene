@@ -50,7 +50,23 @@ export default function DuelDetail() {
       setSaving(false);
     }
   };
+  const deleteTip = async () => {
+  if (!myPick) return;
 
+  setSaving(true);
+
+  try {
+    await api.delete(`/duels/${id}/tip`);
+    setMyPick(null);
+    toast.success("Tipset er slettet");
+    load();
+    refreshMe();
+  } catch (e) {
+    toast.error(formatApiError(e.response?.data?.error));
+  } finally {
+    setSaving(false);
+  }
+};
   if (notFound) return (
     <div className="max-w-2xl mx-auto px-4 py-16 text-center">
       <p className="text-slate-500 font-semibold">Fant ikke duellen.</p>
@@ -158,7 +174,22 @@ export default function DuelDetail() {
             ))}
           </div>
         )}
-        {myPick && isOpen && <p className="text-center text-xs text-[#16A34A] font-semibold mt-3 flex items-center justify-center gap-1"><Check size={12} /> Ditt tips er registrert</p>}
+        {myPick && isOpen && (
+  <div className="text-center mt-3">
+    <p className="text-xs text-[#16A34A] font-semibold flex items-center justify-center gap-1">
+      <Check size={12} /> Ditt tips er registrert
+    </p>
+
+    <button
+      type="button"
+      onClick={deleteTip}
+      disabled={saving}
+      className="mt-1 text-xs font-semibold text-slate-400 hover:text-[#D92525] transition-colors disabled:opacity-50"
+    >
+      Slett tips
+    </button>
+  </div>
+)}
       </div>
 
 

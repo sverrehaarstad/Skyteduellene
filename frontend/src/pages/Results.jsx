@@ -32,13 +32,35 @@ export default function Results() {
   const [duels, setDuels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [myTips, setMyTips] = useState({});
 
-  useEffect(() => {
-    api.get("/duels", { params: { status: "finished" } }).then(({ data }) => {
+useEffect(() => {
+  const load = async () => {
+    try {
+      const { data } = await api.get("/duels", {
+        params: { status: "finished" },
+      });
       setDuels(data);
+
+      try {
+        const res = await api.get("/my-tips");
+        const map = {};
+
+        res.data.forEach((t) => {
+          if (t.duel) map[t.duel.id] = t.pick;
+        });
+
+        setMyTips(map);
+      } catch {
+        setMyTips({});
+      }
+    } finally {
       setLoading(false);
-    });
-  }, []);
+    }
+  };
+
+  load();
+}, []);
 
   const filteredDuels = duels.filter((d) => {
     const searchText = search.trim().toLowerCase();
@@ -201,6 +223,16 @@ export default function Results() {
                   </span>
                 </div>
               </div>
+              {myTips[d.id] && (
+  <p className="text-center text-xs font-semibold text-[#D92525] mt-3">
+    Ditt tips:{" "}
+    {myTips[d.id] === "1"
+      ? d.shooter1.split(" ")[0]
+      : myTips[d.id] === "2"
+        ? d.shooter2.split(" ")[0]
+        : "Uavgjort"}
+  </p>
+)}
             </div>
           ))}
         </div>

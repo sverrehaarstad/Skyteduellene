@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import api, { formatApiError } from "@/lib/api";
@@ -30,7 +30,9 @@ export const DuelCard = ({ duel, myPick, onTipped }) => {
   const navigate = useNavigate();
   const [pick, setPick] = useState(myPick || null);
   const [saving, setSaving] = useState(false);
-
+useEffect(() => {
+  setPick(myPick || null);
+}, [myPick]);
   const tc = duel.tip_counts || { "1": 0, X: 0, "2": 0 };
   const totalTips = tc["1"] + tc["X"] + tc["2"];
   const isLocked = duel.start_at

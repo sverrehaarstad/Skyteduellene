@@ -679,7 +679,7 @@ for tip in tips:
 
     if duel and duel.status == "finished" and tip.pick == duel.outcome:
         correct += 1
-        )
+    
 
         latest_reset = get_latest_reset("global", "all")
 

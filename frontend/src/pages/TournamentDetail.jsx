@@ -9,6 +9,7 @@ export default function TournamentDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
+  const [myTips, setMyTips] = useState({});
   const [notFound, setNotFound] = useState(false);
   const [needsCode, setNeedsCode] = useState(false);
   const [accessCode, setAccessCode] = useState("");
@@ -16,7 +17,20 @@ export default function TournamentDetail() {
   
   useEffect(() => {
    api.get(`/tournaments/${id}`)
-  .then(({ data }) => setData(data))
+  .then(async ({ data }) => {
+  setData(data);
+
+  try {
+    const res = await api.get("/my-tips");
+    const map = {};
+    res.data.forEach((t) => {
+      if (t.duel) map[t.duel.id] = t.pick;
+    });
+    setMyTips(map);
+  } catch {
+    setMyTips({});
+  }
+})
     .catch((err) => {
     if (err.response?.status === 403) {
       setNeedsCode(true);
@@ -176,6 +190,16 @@ const joinPrivateSeries = async (e) => {
       )}
     </div>
   </div>
+   {myTips[d.id] && (
+  <p className="text-xs font-semibold text-[#D92525] mt-2">
+    Ditt tips:{" "}
+    {myTips[d.id] === "1"
+      ? d.shooter1.split(" ")[0]
+      : myTips[d.id] === "2"
+        ? d.shooter2.split(" ")[0]
+        : "Uavgjort"}
+  </p>
+)}           
 </div>
             <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${d.status === "finished" ? "bg-slate-100 text-slate-600" : "bg-green-50 text-[#16A34A]"}`}>
               {d.status === "finished" ? "Avsluttet" : "Åpen"}

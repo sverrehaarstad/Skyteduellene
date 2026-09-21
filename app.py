@@ -490,7 +490,49 @@ def tip_duel(duel_id):
         "message": "Tips lagret",
         "tip": tip.to_dict()
     }), 200
+@app.route('/api/duels/<int:duel_id>/tip', methods=['DELETE'])
+@jwt_required()
+def delete_own_tip(duel_id):
+    user_id = int(get_jwt_identity())
 
+    duel = Duel.query.get(duel_id)
+    if not duel or duel.is_deleted:
+        return jsonify({"error": "Duell ikke funnet"}), 404
+
+    if duel.status == "finished":
+        return jsonify({"error": "Duellen er avsluttet"}), 400
+
+    if duel.start_at:
+        try:
+            start_time = datetime.fromisoformat(duel.start_at)
+
+            if start_time.tzinfo is None:
+                start_time = start_time.replace(
+                    tzinfo=ZoneInfo("Europe/Oslo")
+                )
+
+            if datetime.now(ZoneInfo("Europe/Oslo")) >= start_time:
+                return jsonify({
+                    "error": "Tippefristen for denne duellen har gått ut"
+                }), 400
+        except ValueError:
+            pass
+
+    tip = Tip.query.filter_by(
+        user_id=user_id,
+        duel_id=duel_id
+    ).first()
+
+    if not tip:
+        return jsonify({"error": "Du har ikke tippet på denne duellen"}), 404
+
+    db.session.delete(tip)
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "message": "Tipset er slettet"
+    }), 200
 @app.route('/api/duels/<int:duel_id>/result', methods=['POST', 'OPTIONS'])
 @jwt_required()
 def save_duel_result(duel_id):

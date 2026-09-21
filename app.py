@@ -899,7 +899,11 @@ def get_tournament(tid):
 
         correct = sum(record.points for record in point_records)
 
-        total_tips = len(tips)
+        total_tips = sum(
+    1
+    for tip in tips
+    if any(duel.id == tip.duel_id for duel in visible_duels)
+)
         accuracy = round(
             (correct / total_tips) * 100, 1
         ) if total_tips > 0 else 0

@@ -674,11 +674,11 @@ def leaderboard():
 
         correct = 0
 
-for tip in tips:
-    duel = Duel.query.get(tip.duel_id)
+        for tip in tips:
+            duel = Duel.query.get(tip.duel_id)
 
-    if duel and duel.status == "finished" and tip.pick == duel.outcome:
-        correct += 1
+            if duel and duel.status == "finished" and tip.pick == duel.outcome:
+                correct += 1
     
 
         latest_reset = get_latest_reset("global", "all")

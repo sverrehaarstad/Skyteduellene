@@ -672,11 +672,13 @@ def leaderboard():
 
         total_tips = len(tips)
 
-        correct = sum(
-            1 for tip in tips
-            if tip.duel
-            and tip.duel.status == "finished"
-            and tip.pick == tip.duel.outcome
+        correct = 0
+
+for tip in tips:
+    duel = Duel.query.get(tip.duel_id)
+
+    if duel and duel.status == "finished" and tip.pick == duel.outcome:
+        correct += 1
         )
 
         latest_reset = get_latest_reset("global", "all")

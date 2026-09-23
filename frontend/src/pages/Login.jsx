@@ -21,7 +21,7 @@ export default function Login() {
     setError("");
     try {
       const { data } = await api.post("/auth/login", { username, password, remember });
-      setSession(data);
+      setSession(data, remember);
       navigate("/");
     } catch (err) {
       setError(formatApiError(err.response?.data?.detail) || err.message);

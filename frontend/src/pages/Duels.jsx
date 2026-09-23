@@ -54,12 +54,14 @@ setDuels(activeDuels);
 
   const onTipped = () => { load(); refreshMe(); };
   const activeTournaments = tournaments.filter((t) =>
-   duels.some((duel) => duel.tournament_ids?.includes(t.id))
+  duel.tournament_ids?.some((id) => Number(id) === Number(t.id))
 );
 
   const visibleDuels = selectedTournament
    ? duels.filter((duel) =>
-      duel.tournament_ids?.includes(selectedTournament)
+      duel.tournament_ids?.some(
+  (id) => Number(id) === Number(selectedTournament)
+)
     )
   : duels;
   return (

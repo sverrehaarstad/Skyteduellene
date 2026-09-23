@@ -62,7 +62,7 @@ setDuels(activeDuels);
             Tipp Norges<br /><span className="text-[#D92525]">skarpeste skyttere</span>
           </h1>
           <p className="text-base text-slate-600 mt-4 max-w-md">
-            Duellene fra DFS-banen. Velg vinner (1), uavgjort (U) eller utfordrer (2) – samle poeng og klatre på lederboardet.
+            Duellene fra DFS-banen. Velg vinner (1), uavgjort (U) eller utfordrer (2) – samle poeng og klatre på topplisten.
           </p>
         </div>
       </div>

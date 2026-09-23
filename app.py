@@ -790,8 +790,39 @@ def delete_user(target_user_id):
     }), 200
 @app.route('/api/tournaments', methods=['GET'])
 def get_tournaments():
+    verify_jwt_in_request(optional=True)
+    identity = get_jwt_identity()
+
+    user_id = int(identity) if identity else None
+    user = User.query.get(user_id) if user_id else None
+    is_admin = user is not None and get_role(user.username) == "admin"
+
     tournaments = Tournament.query.order_by(Tournament.id.desc()).all()
-    return jsonify([t.to_dict() for t in tournaments]), 200
+    visible_tournaments = []
+
+    for tournament in tournaments:
+        access = TournamentAccess.query.filter_by(
+            tournament_id=tournament.id
+        ).first()
+
+        if not access or not access.is_private:
+            visible_tournaments.append(tournament)
+            continue
+
+        if is_admin:
+            visible_tournaments.append(tournament)
+            continue
+
+        if user_id:
+            membership = TournamentMember.query.filter_by(
+                tournament_id=tournament.id,
+                user_id=user_id
+            ).first()
+
+            if membership:
+                visible_tournaments.append(tournament)
+
+    return jsonify([t.to_dict() for t in visible_tournaments]), 200
 
 
 @app.route('/api/tournaments', methods=['POST', 'OPTIONS'])

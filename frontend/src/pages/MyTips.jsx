@@ -45,7 +45,9 @@ export default function MyTips() {
         </div>
       ) : (
         <div className="space-y-3" data-testid="mytips-list">
-          {tips.map((t) => (
+        {[...tips]
+  .sort((a, b) => new Date(b.duel.start_at || 0) - new Date(a.duel.start_at || 0))
+  .map((t) => (
             <div key={t.id} className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between gap-3" data-testid={`mytip-${t.id}`}>
               <div className="min-w-0">
                 <p className="text-xs text-[#B91C1C] font-semibold uppercase tracking-wider">{t.duel.discipline}</p>

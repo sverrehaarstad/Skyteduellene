@@ -23,8 +23,8 @@ export const Navbar = () => {
   const links = [
     { to: "/", label: "Dueller", icon: Swords, testid: "nav-duels" },
     { to: "/resultater", label: "Resultater", icon: ListChecks, testid: "nav-results" },
-    { to: "/serier", label: "Serier", icon: Medal, testid: "nav-tournaments" },
-    { to: "/lederboard", label: "Lederboard", icon: Trophy, testid: "nav-leaderboard" },
+    { to: "/serier", label: "Konkurranser", icon: Medal, testid: "nav-tournaments" },
+    { to: "/lederboard", label: "Toppliste", icon: Trophy, testid: "nav-leaderboard" },
   ];
   if (user) links.push({ to: "/mine-tips", label: "Mine Tips", icon: ClipboardList, testid: "nav-mytips" });
   if (user?.role === "admin") links.push({ to: "/admin", label: "Admin", icon: Shield, testid: "nav-admin" });

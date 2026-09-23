@@ -22,10 +22,11 @@ export function AuthProvider({ children }) {
       const { data } = await api.get("/auth/me");
       setUser(data);
     } catch {
-      localStorage.removeItem("rt_token");
-      setToken(null);
-      setUser(false);
-    }
+  localStorage.removeItem("rt_token");
+  sessionStorage.removeItem("rt_token");
+  setToken(null);
+  setUser(false);
+}
   }, []);
 
   useEffect(() => {

@@ -18,20 +18,20 @@ export default function Tournaments() {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
       <div className="flex items-center gap-2 mb-6">
         <Trophy size={22} className="text-[#D92525]" />
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900" style={{ fontFamily: "Outfit, sans-serif" }}>Serier & Sesonger</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900" style={{ fontFamily: "Outfit, sans-serif" }}>Konkurranser</h1>
       </div>
 <input
   type="text"
   value={search}
   onChange={(e) => setSearch(e.target.value)}
-  placeholder="Søk etter serie..."
+  placeholder="Søk etter konkurranse..."
   className="w-full mb-6 px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-[#D92525]"
 />
       {loading ? (
         <p className="text-slate-500">Laster...</p>
       ) : tours.length === 0 ? (
         <div className="text-center py-16 bg-white border border-dashed border-slate-300 rounded-xl" data-testid="no-tournaments">
-          <p className="text-slate-500 font-semibold">Ingen serier opprettet ennå.</p>
+          <p className="text-slate-500 font-semibold">Ingen konkurranser opprettet ennå.</p>
         </div>
       ) : (
         <div className="space-y-3" data-testid="tournaments-list">

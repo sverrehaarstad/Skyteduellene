@@ -19,7 +19,7 @@ export default function Leaderboard() {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
       <div className="flex items-center gap-2 mb-6">
         <Trophy size={22} className="text-[#D92525]" />
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900" style={{ fontFamily: "Outfit, sans-serif" }}>Lederboard</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900" style={{ fontFamily: "Outfit, sans-serif" }}>Toppliste</h1>
       </div>
 
       {loading ? (

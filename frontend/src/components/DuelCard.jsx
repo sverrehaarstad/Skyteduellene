@@ -161,7 +161,7 @@ useEffect(() => {
 />
 
 <PickButton
-  label="Uavgjort"
+  label="U"
   sub="ved lik poengsum"
   count={`${tc["X"]} tips`}
   active={pick === "X"}

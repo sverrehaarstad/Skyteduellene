@@ -105,7 +105,7 @@ setDuels(activeDuels);
           className={`px-4 py-2 rounded-lg whitespace-nowrap border transition ${
             selectedTournament === t.id
               ? "bg-primary text-primary-foreground border-primary"
-              : "bg-card hover:bg-muted"
+              "bg-[#D92525] text-white border-[#D92525] hover:bg-[#B91C1C]"
           }`}
         >
           {t.name}

@@ -163,12 +163,12 @@ export default function DuelDetail() {
         {/* Tipping */}
         {isOpen && (
           <div className="grid grid-cols-3 gap-2 mt-8">
-            {[["1", duel.shooter1.split(" ")[0]], ["X", "Uavgjort"], ["2", duel.shooter2.split(" ")[0]]].map(([val, sub]) => (
+            {[["1", duel.shooter1.split(" ")[0]], ["X", "ved lik poengsum"], ["2", duel.shooter2.split(" ")[0]]].map(([val, sub]) => (
               <button key={val} onClick={() => placeTip(val)} disabled={saving} data-testid={`detail-tip-${val}`}
                 className={`flex flex-col items-center py-4 rounded-xl border transition-colors duration-200 ${
                   myPick === val ? "bg-[#D92525] border-[#D92525] text-white shadow-sm" : "bg-white border-slate-200 text-slate-800 hover:border-[#FCA5A5] hover:bg-[#FEF2F2]"
                 }`}>
-                <span className="font-black text-xl" style={{ fontFamily: "Outfit, sans-serif" }}>{val === "X" ? "U" : val}</span>
+                <span className="font-black text-xl" style={{ fontFamily: "Outfit, sans-serif" }}>{val === "X" ? "ved lik poengsum" : val}</span>
                 <span className={`text-[11px] font-semibold uppercase tracking-wider mt-1 ${myPick === val ? "text-red-100" : "text-slate-500"}`}>{sub}</span>
               </button>
             ))}

@@ -61,9 +61,9 @@ const joinPrivateSeries = async (e) => {
   return (
     <div className="max-w-md mx-auto px-4 py-16">
       <div className="bg-white border border-slate-200 rounded-2xl p-6">
-        <h1 className="text-xl font-bold text-slate-900 mb-2">Privat serie 🔒</h1>
+        <h1 className="text-xl font-bold text-slate-900 mb-2">Privat konkurranse 🔒</h1>
         <p className="text-sm text-slate-500 mb-4">
-          Skriv inn koden for å bli med i serien.
+          Skriv inn koden for å bli med i konkurransen.
         </p>
 
         <form onSubmit={joinPrivateSeries} className="space-y-3">
@@ -89,7 +89,7 @@ const joinPrivateSeries = async (e) => {
     </div>
   );
 }
-  if (notFound) return <div className="max-w-2xl mx-auto px-4 py-16 text-slate-500">Fant ikke serien.</div>;
+  if (notFound) return <div className="max-w-2xl mx-auto px-4 py-16 text-slate-500">Fant ikke konkurransen.</div>;
   if (!data) return <div className="max-w-2xl mx-auto px-4 py-16 text-slate-500">Laster...</div>;
 
   const { tournament, standings, duels, winners, finished_count, duel_count } = data;
@@ -133,7 +133,7 @@ const joinPrivateSeries = async (e) => {
       {/* Standings */}
       <h2 className="flex items-center gap-2 font-bold text-slate-900 mb-3"><Trophy size={18} className="text-[#D92525]" /> Sesongtabell</h2>
       {standings.length === 0 ? (
-        <p className="text-slate-500 text-sm mb-6">Ingen tips lagt inn i denne serien ennå.</p>
+        <p className="text-slate-500 text-sm mb-6">Ingen tips lagt inn i denne konkurransen ennå.</p>
       ) : (
         <div className="bg-white border border-slate-200 rounded-xl overflow-hidden mb-8" data-testid="tournament-standings">
           <div className="grid grid-cols-12 px-4 py-3 bg-slate-50 border-b border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-500">
@@ -158,7 +158,7 @@ const joinPrivateSeries = async (e) => {
       )}
 
       {/* Duels in season */}
-      <h2 className="flex items-center gap-2 font-bold text-slate-900 mb-3"><ListChecks size={18} className="text-[#D92525]" /> Dueller i serien</h2>
+      <h2 className="flex items-center gap-2 font-bold text-slate-900 mb-3"><ListChecks size={18} className="text-[#D92525]" /> Dueller i konkurransen</h2>
       <div className="space-y-3" data-testid="tournament-duels">
         {duels.map((d) => (
           <Link key={d.id} to={`/duell/${d.id}`} className="flex items-center justify-between bg-white border border-slate-200 rounded-xl p-4 hover:border-[#FCA5A5] transition-colors">

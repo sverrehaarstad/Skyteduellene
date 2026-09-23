@@ -13,6 +13,8 @@ export default function Duels() {
   const [myTips, setMyTips] = useState({});
   const [loading, setLoading] = useState(true);
   const [hero, setHero] = useState(DEFAULT_HERO);
+  const [tournaments, setTournaments] = useState([]);
+const [selectedTournament, setSelectedTournament] = useState(null);
 
   const load = useCallback(async () => {
     try {
@@ -44,9 +46,22 @@ setDuels(activeDuels);
   useEffect(() => {
     api.get("/settings").then(({ data }) => data.hero_image && setHero(data.hero_image)).catch(() => {});
   }, []);
+  useEffect(() => {
+  api.get("/tournaments")
+    .then(({ data }) => setTournaments(data))
+    .catch(() => setTournaments([]));
+}, [user]);
 
   const onTipped = () => { load(); refreshMe(); };
+  const activeTournaments = tournaments.filter((t) =>
+   duels.some((duel) => duel.tournament_ids?.includes(t.id))
+);
 
+  const visibleDuels = selectedTournament
+   ? duels.filter((duel) =>
+      duel.tournament_ids?.includes(selectedTournament)
+    )
+  : duels;
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
       {/* Hero */}
@@ -66,7 +81,33 @@ setDuels(activeDuels);
           </p>
         </div>
       </div>
+{activeTournaments.length > 0 && (
+  <div className="mb-5">
+    <div className="flex items-center gap-4 overflow-x-auto pb-2">
+      <span className="text-sm font-semibold text-muted-foreground whitespace-nowrap">
+        Aktive konkurranser
+      </span>
 
+      {activeTournaments.map((t) => (
+        <button
+          key={t.id}
+          onClick={() =>
+            setSelectedTournament(
+              selectedTournament === t.id ? null : t.id
+            )
+          }
+          className={`px-4 py-2 rounded-lg whitespace-nowrap border transition ${
+            selectedTournament === t.id
+              ? "bg-primary text-primary-foreground border-primary"
+              : "bg-card hover:bg-muted"
+          }`}
+        >
+          {t.name}
+        </button>
+      ))}
+    </div>
+  </div>
+)}
       <div className="flex items-center gap-2 mb-5">
         <Swords size={22} className="text-[#D92525]" />
         <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900" style={{ fontFamily: "Outfit, sans-serif" }}>Aktive Dueller</h2>
@@ -82,7 +123,7 @@ setDuels(activeDuels);
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="duels-grid">
-          {duels.map((d) => (
+          {visibleDuels.map((d) => (
             <DuelCard key={d.id} duel={d} myPick={myTips[d.id]} onTipped={onTipped} />
           ))}
         </div>

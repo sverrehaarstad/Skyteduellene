@@ -5,14 +5,16 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null); // null = loading, false = anon, obj = user
-  const [token, setToken] = useState(localStorage.getItem("rt_token"));
+  const [token, setToken] = useState(
+  localStorage.getItem("rt_token") || sessionStorage.getItem("rt_token")
+);
 
   const refreshMe = useCallback(async () => {
     // Skip during OAuth callback; AuthCallback establishes the session first
     if (window.location.hash && window.location.hash.includes("session_id=")) {
       return;
     }
-    if (!localStorage.getItem("rt_token")) {
+    if (!localStorage.getItem("rt_token") && !sessionStorage.getItem("rt_token")) {
       setUser(false);
       return;
     }
@@ -30,17 +32,25 @@ export function AuthProvider({ children }) {
     refreshMe();
   }, [refreshMe]);
 
-  const setSession = (data) => {
+  const setSession = (data, remember = true) => {
+    if (remember) {
     localStorage.setItem("rt_token", data.token);
-    setToken(data.token);
-    setUser(data.user);
-  };
+    sessionStorage.removeItem("rt_token");
+  } else {
+    sessionStorage.setItem("rt_token", data.token);
+    localStorage.removeItem("rt_token");
+  }
+
+  setToken(data.token);
+  setUser(data.user);
+};
 
   const logout = () => {
-    localStorage.removeItem("rt_token");
-    setToken(null);
-    setUser(false);
-  };
+  localStorage.removeItem("rt_token");
+  sessionStorage.removeItem("rt_token");
+  setToken(null);
+  setUser(false);
+};
 
   return (
     <AuthContext.Provider value={{ user, token, setSession, logout, refreshMe, setUser }}>

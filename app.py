@@ -38,7 +38,11 @@ ADMIN_USERNAMES = {
 }
 
 def get_role(username):
-    return "admin" if username in ADMIN_USERNAMES else "user"
+    if username in ADMIN_USERNAMES:
+        return "admin"
+
+    user = User.query.filter_by(username=username).first()
+    return user.role if user and user.role in ["admin", "user"] else "user"
 # ==================== Models ====================
 
 class User(db.Model):
@@ -48,6 +52,7 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
+    role = db.Column(db.String(20), default="user", nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.now())
     
     def set_password(self, password):
@@ -61,6 +66,7 @@ class User(db.Model):
     'id': self.id,
     'username': self.username,
     'role': get_role(self.username),
+    'is_seed_admin': self.username in ADMIN_USERNAMES,
     'created_at': self.created_at.isoformat()
 }
 class Duel(db.Model):
@@ -724,6 +730,33 @@ def get_admin_users():
     users = User.query.order_by(User.created_at.asc()).all()
 
     return jsonify([user.to_dict() for user in users]), 200
+@app.route('/api/admin/users/<int:target_user_id>/role', methods=['POST'])
+@jwt_required()
+def set_user_role(target_user_id):
+    admin_id = int(get_jwt_identity())
+    admin = User.query.get(admin_id)
+
+    if not admin or get_role(admin.username) != "admin":
+        return jsonify({"error": "Ingen tilgang"}), 403
+
+    target_user = User.query.get(target_user_id)
+
+    if not target_user:
+        return jsonify({"error": "Bruker ikke funnet"}), 404
+
+    if target_user.username in ADMIN_USERNAMES:
+        return jsonify({"error": "Hovedadmin kan ikke endres"}), 400
+
+    data = request.get_json() or {}
+    role = data.get("role")
+
+    if role not in ["admin", "user"]:
+        return jsonify({"error": "Ugyldig rolle"}), 400
+
+    target_user.role = role
+    db.session.commit()
+
+    return jsonify(target_user.to_dict()), 200
 @app.route('/api/admin/users/<int:target_user_id>', methods=['DELETE'])
 @jwt_required()
 def delete_user(target_user_id):

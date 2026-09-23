@@ -138,13 +138,13 @@ shooter2_img: "",
   };
 
     const resetSeasonPoints = async (id) => {
-    if (!window.confirm("Nullstille poengene i denne serien?")) {
+    if (!window.confirm("Nullstille poengene i denne konkurransen?")) {
       return;
     }
 
     try {
       await api.post(`/tournaments/${id}/reset-points`);
-      toast.success("Poengene i serien er nullstilt");
+      toast.success("Poengene i konkurransen er nullstilt");
       load();
     } catch (err) {
       toast.error(formatApiError(err.response?.data?.error || err.response?.data?.detail));
@@ -255,7 +255,7 @@ shooter2_img: "",
             </div>
           </div>
           <div>
-            <label className="text-sm font-semibold text-slate-700">Serier / Sesonger</label>
+            <label className="text-sm font-semibold text-slate-700">Konkurranser / Sesonger</label>
 
 <div className="mt-2 space-y-2">
   {tournaments.map((t) => (
@@ -276,7 +276,7 @@ shooter2_img: "",
   ))}
 
   {tournaments.length === 0 && (
-    <p className="text-sm text-slate-400">Ingen serier opprettet.</p>
+    <p className="text-sm text-slate-400">Ingen konkurranser opprettet.</p>
   )}
 </div>
             
@@ -290,7 +290,7 @@ shooter2_img: "",
         <div className="lg:col-span-3 space-y-3">
           {/* Season management */}
           <div className="bg-white border border-slate-200 rounded-2xl p-6">
-            <h2 className="font-bold text-slate-900 flex items-center gap-2 mb-4"><Trophy size={18} className="text-[#EAB308]" /> Serier / Sesonger</h2>
+            <h2 className="font-bold text-slate-900 flex items-center gap-2 mb-4"><Trophy size={18} className="text-[#EAB308]" /> Konkurranser / Sesonger</h2>
             <form onSubmit={createSeason} className="flex flex-col sm:flex-row gap-2 mb-4" data-testid="create-season-form">
               <input data-testid="season-name" required value={seasonForm.name} onChange={(e) => setSeasonForm({ ...seasonForm, name: e.target.value })} placeholder="Navn (f.eks. Vintercupen)"
                 className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]" />
@@ -302,13 +302,13 @@ shooter2_img: "",
     checked={seasonForm.is_private}
     onChange={(e) => setSeasonForm({ ...seasonForm, is_private: e.target.checked })}
   />
-  Privat serie
+  Privat konkurranse
 </label>
               {seasonForm.is_private && (
   <input
     value={seasonForm.access_code}
     onChange={(e) => setSeasonForm({ ...seasonForm, access_code: e.target.value })}
-    placeholder="Kode til privat serie"
+    placeholder="Kode til privat konkurranse"
     className="w-full sm:w-48 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]"
   />
 )}
@@ -324,7 +324,7 @@ shooter2_img: "",
   Nullstill totalpoeng
 </button>
             {tournaments.length === 0 ? (
-              <p className="text-slate-500 text-sm">Ingen serier ennå.</p>
+              <p className="text-slate-500 text-sm">Ingen konkurranser ennå.</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {tournaments.map((t) => (

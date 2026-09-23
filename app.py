@@ -67,6 +67,13 @@ class User(db.Model):
     'username': self.username,
     'role': get_role(self.username),
     'is_seed_admin': self.username in ADMIN_USERNAMES,
+    'points': sum(
+    record.points
+    for record in PointRecord.query.filter_by(
+        user_id=self.id,
+        active=True
+    ).all()
+),
     'created_at': self.created_at.isoformat()
 }
 class Duel(db.Model):

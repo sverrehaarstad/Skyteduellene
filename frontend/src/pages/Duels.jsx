@@ -93,7 +93,16 @@ setDuels(activeDuels);
       <span className="text-sm font-semibold text-muted-foreground whitespace-nowrap">
         Aktive konkurranser
       </span>
-
+<button
+  onClick={() => setSelectedTournament(null)}
+  className={`px-4 py-2 rounded-lg whitespace-nowrap border transition ${
+    selectedTournament === null
+      ? "bg-[#B91C1C] text-white border-[#B91C1C]"
+      : "bg-[#D92525] text-white border-[#D92525] hover:bg-[#B91C1C]"
+  }`}
+>
+  Alle dueller
+</button>
       {activeTournaments.map((t) => (
         <button
           key={t.id}

@@ -9,8 +9,8 @@ services:
     #   /api/duels, /api/settings, /api/tournaments, /api/leaderboard, ...
     # and whose CORS config blocks credentialed cross-origin POSTs
     # (register/login). Deploy backend/server.py instead.
-    buildCommand: pip install -r backend/requirements.txt
-    startCommand: cd backend && uvicorn server:app --host 0.0.0.0 --port $PORT
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
         value: "3.11"

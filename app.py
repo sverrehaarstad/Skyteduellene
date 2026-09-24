@@ -366,6 +366,11 @@ def get_duel(duel_id):
 @app.route('/api/duels/<int:duel_id>', methods=['DELETE'])
 @jwt_required()
 def delete_duel(duel_id):
+    user_id = int(get_jwt_identity())
+    user = User.query.get(user_id)
+
+    if not user or get_role(user.username) != "admin":
+        return jsonify({"error": "Ingen tilgang"}), 403
     duel = Duel.query.get(duel_id)
 
     if not duel:
@@ -379,6 +384,11 @@ def delete_duel(duel_id):
 @app.route('/api/tournaments/<int:tid>', methods=['DELETE'])
 @jwt_required()
 def delete_tournament(tid):
+    user_id = int(get_jwt_identity())
+    user = User.query.get(user_id)
+
+    if not user or get_role(user.username) != "admin":
+        return jsonify({"error": "Ingen tilgang"}), 403
     tournament = Tournament.query.get(tid)
 
     if not tournament:
@@ -404,6 +414,14 @@ def delete_tournament(tid):
 def create_duel():
     if request.method == 'OPTIONS':
         return '', 204
+        
+        verify_jwt_in_request()
+
+    user_id = int(get_jwt_identity())
+    user = User.query.get(user_id)
+
+    if not user or get_role(user.username) != "admin":
+        return jsonify({"error": "Ingen tilgang"}), 403
 
     data = request.get_json() or {}
 
@@ -551,6 +569,11 @@ def delete_own_tip(duel_id):
 def save_duel_result(duel_id):
     if request.method == 'OPTIONS':
         return '', 204
+    user_id = int(get_jwt_identity())
+    user = User.query.get(user_id)
+
+    if not user or get_role(user.username) != "admin":
+        return jsonify({"error": "Ingen tilgang"}), 403
 
     data = request.get_json() or {}
 

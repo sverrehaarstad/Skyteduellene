@@ -860,6 +860,11 @@ def get_tournaments():
 def create_tournament():
     if request.method == 'OPTIONS':
         return '', 204
+    user_id = int(get_jwt_identity())
+    user = User.query.get(user_id)
+
+    if not user or get_role(user.username) != "admin":
+        return jsonify({"error": "Ingen tilgang"}), 403
 
     data = request.get_json() or {}
 
@@ -1255,6 +1260,11 @@ def get_settings():
 @app.route('/api/settings', methods=['PUT'])
 @jwt_required()
 def update_settings():
+    user_id = int(get_jwt_identity())
+    user = User.query.get(user_id)
+
+    if not user or get_role(user.username) != "admin":
+        return jsonify({"error": "Ingen tilgang"}), 403
     data = request.get_json() or {}
     hero_image = data.get("hero_image", "")
 

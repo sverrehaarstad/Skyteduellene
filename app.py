@@ -62,20 +62,31 @@ class User(db.Model):
         return check_password_hash(self.password_hash, password)
     
     def to_dict(self):
-       return {
-    'id': self.id,
-    'username': self.username,
-    'role': get_role(self.username),
-    'is_seed_admin': self.username in ADMIN_USERNAMES,
-    'points': sum(
-    record.points
-    for record in PointRecord.query.filter_by(
-        user_id=self.id,
-        active=True
-    ).all()
-),
-    'created_at': self.created_at.isoformat()
-}
+        latest_reset = get_latest_reset("global", "all")
+
+        point_query = PointRecord.query.filter_by(
+            user_id=self.id,
+            active=True
+        )
+
+        if latest_reset:
+            point_query = point_query.filter(
+                PointRecord.created_at > latest_reset
+            )
+
+        points = sum(
+            record.points
+            for record in point_query.all()
+        )
+
+        return {
+            'id': self.id,
+            'username': self.username,
+            'role': get_role(self.username),
+            'is_seed_admin': self.username in ADMIN_USERNAMES,
+            'points': points,
+            'created_at': self.created_at.isoformat()
+        }
 class Duel(db.Model):
     __tablename__ = 'duels'
 
@@ -485,6 +496,29 @@ def tip_duel(duel_id):
     duel = Duel.query.get(duel_id)
     if not duel:
         return jsonify({"error": "Duell ikke funnet"}), 404
+    links = DuelTournament.query.filter_by(duel_id=duel.id).all()
+
+    private_tournament_ids = []
+
+    for link in links:
+        access = TournamentAccess.query.filter_by(
+            tournament_id=link.tournament_id
+        ).first()
+
+        if access and access.is_private:
+            private_tournament_ids.append(link.tournament_id)
+
+    if private_tournament_ids:
+        user = User.query.get(user_id)
+        is_admin = user is not None and get_role(user.username) == "admin"
+
+        membership = TournamentMember.query.filter(
+            TournamentMember.user_id == user_id,
+            TournamentMember.tournament_id.in_(private_tournament_ids)
+        ).first()
+
+        if not is_admin and not membership:
+            return jsonify({"error": "Ingen tilgang"}), 403
 
     if duel.status == "finished":
         return jsonify({"error": "Duellen er avsluttet"}), 400
@@ -529,6 +563,29 @@ def delete_own_tip(duel_id):
     duel = Duel.query.get(duel_id)
     if not duel or duel.is_deleted:
         return jsonify({"error": "Duell ikke funnet"}), 404
+    links = DuelTournament.query.filter_by(duel_id=duel.id).all()
+
+    private_tournament_ids = []
+
+    for link in links:
+        access = TournamentAccess.query.filter_by(
+            tournament_id=link.tournament_id
+        ).first()
+
+        if access and access.is_private:
+            private_tournament_ids.append(link.tournament_id)
+
+    if private_tournament_ids:
+        user = User.query.get(user_id)
+        is_admin = user is not None and get_role(user.username) == "admin"
+
+        membership = TournamentMember.query.filter(
+            TournamentMember.user_id == user_id,
+            TournamentMember.tournament_id.in_(private_tournament_ids)
+        ).first()
+
+        if not is_admin and not membership:
+            return jsonify({"error": "Ingen tilgang"}), 403
 
     if duel.status == "finished":
         return jsonify({"error": "Duellen er avsluttet"}), 400
@@ -1312,7 +1369,6 @@ def upload_image():
         return jsonify({"error": "Kunne ikke laste opp bildet"}), 500
 # ==================== Database initialization ====================
 
-@app.before_request
 def create_tables():
     db.create_all()
     
@@ -1342,5 +1398,9 @@ def create_tables():
 
     if changed:
         db.session.commit()
+
+with app.app_context():
+    create_tables()
+
 if __name__ == '__main__':
     app.run(debug=False)

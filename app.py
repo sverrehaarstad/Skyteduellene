@@ -426,7 +426,7 @@ def create_duel():
     if request.method == 'OPTIONS':
         return '', 204
         
-        verify_jwt_in_request()
+    verify_jwt_in_request()
 
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import api, { formatApiError } from "@/lib/api";
@@ -48,6 +48,8 @@ shooter2_img: "",
   const [suggestionBusy, setSuggestionBusy] = useState(false);
   const [rejectionNote, setRejectionNote] = useState("");
   const [editSuggestion, setEditSuggestion] = useState({ outcome: "", score1: "", score2: "" });
+  const [participantText, setParticipantText] = useState("");
+  const [participantSearch, setParticipantSearch] = useState("");
 
   const load = useCallback(async () => {
 const d = await api.get("/duels");
@@ -82,6 +84,11 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
   const finishedDuels = duels.filter((d) => d.status === "finished");
   const shownDuels = duelTab === "active" ? activeDuels : finishedDuels;
   const importReadyDuels = duels.filter((d) => d.external_source && d.external_event_url);
+  const participants = useMemo(() => {
+  const names = participantText
+    .split(/\r?\n/)
+    .map((name) => name.trim())
+    .filter(Boolean);
 
   const saveHero = async (e) => {
     e.preventDefault();
@@ -119,7 +126,15 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
 
   const createDuel = async (e) => {
     e.preventDefault();
-    if (!form.shooter1 || !form.shooter2) return;
+  if (!form.shooter1 || !form.shooter2) {
+  toast.error("Velg to skyttere før du oppretter duellen.");
+  return;
+}
+
+  if (form.shooter1 === form.shooter2) {
+  toast.error("Skytter 1 og Skytter 2 må være forskjellige.");
+  return;
+}
     setBusy(true);
     try {
       await api.post("/duels", form);
@@ -310,10 +325,22 @@ shooter2_img: "",
       </div>
 
       <div className="grid lg:grid-cols-5 gap-6">
-        {/* Create form */}
-        <form onSubmit={createDuel} className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 space-y-4 h-fit" data-testid="create-duel-form">
-          <h2 className="font-bold text-slate-900 flex items-center gap-2"><Plus size={18} className="text-[#D92525]" /> Ny duell</h2>
-          <div>
+         {/* Choose participants */}
+<div
+  className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 space-y-4"
+  data-testid="choose-participants"
+>
+  <div className="lg:col-span-2 space-y-4">
+  {/* Lim inn deltakerblokken her */}
+
+  <form
+    onSubmit={createDuel}
+    className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4"
+    data-testid="create-duel-form"
+  >
+    {/* eksisterende innhold i skjemaet */}
+  </form>
+</div>
             <label className="text-sm font-semibold text-slate-700">Skytter 1</label>
             <input data-testid="duel-shooter1" required value={form.shooter1} onChange={(e) => setForm({ ...form, shooter1: e.target.value })}
               className="mt-1 w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]" />

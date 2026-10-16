@@ -90,6 +90,19 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
     .map((name) => name.trim())
     .filter(Boolean);
 
+  const uniqueNames = [...new Set(names)];
+
+  if (!participantSearch.trim()) {
+    return uniqueNames;
+  }
+
+  const search = participantSearch.toLowerCase();
+
+  return uniqueNames.filter((name) =>
+    name.toLowerCase().includes(search)
+  );
+}, [participantText, participantSearch]);
+
   const saveHero = async (e) => {
     e.preventDefault();
     try {
@@ -326,22 +339,19 @@ shooter2_img: "",
 
       <div className="grid lg:grid-cols-5 gap-6">
          {/* Choose participants */}
-<div
-  className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 space-y-4"
-  data-testid="choose-participants"
+<form
+  onSubmit={createDuel}
+  className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 space-y-4 h-fit"
+  data-testid="create-duel-form"
 >
-  <div className="lg:col-span-2 space-y-4">
-  {/* Lim inn deltakerblokken her */}
+  <h2 className="font-bold text-slate-900 flex items-center gap-2">
+    <Plus size={18} className="text-[#D92525]" />
+    Ny duell
+  </h2>
 
-  <form
-    onSubmit={createDuel}
-    className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4"
-    data-testid="create-duel-form"
-  >
-    {/* eksisterende innhold i skjemaet */}
-  </form>
-</div>
-            <label className="text-sm font-semibold text-slate-700">Skytter 1</label>
+  <label className="text-sm font-semibold text-slate-700">
+    Skytter 1
+  </label>
             <input data-testid="duel-shooter1" required value={form.shooter1} onChange={(e) => setForm({ ...form, shooter1: e.target.value })}
               className="mt-1 w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-[#D92525]" />
             <input

@@ -539,11 +539,11 @@ class ExternalResultSuggestionService:
     def _conservative_fetch(self, source, duel, event_url):
         try:
             body = self._fetch_url(event_url)
-        except (HTTPError, URLError, TimeoutError, ValueError) as exc:
+        except (HTTPError, URLError, TimeoutError, ValueError):
             return {
                 "status": "needs_review",
                 "status_reason": "source_unavailable",
-                "message": f"{source} kunne ikke leses: {str(exc)}"
+                "message": f"{source} kunne ikke leses akkurat nå."
             }
 
         return {

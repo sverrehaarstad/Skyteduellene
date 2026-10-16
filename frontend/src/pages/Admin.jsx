@@ -101,7 +101,7 @@ const u = await api.get("/admin/users").catch(() => ({ data: [] }));
   return uniqueNames.filter((name) =>
     name.toLowerCase().includes(search)
   );
-}, [participantText, participantSearch]);
+  }, [participantText, participantSearch]);
 
   const saveHero = async (e) => {
     e.preventDefault();
@@ -344,11 +344,12 @@ shooter2_img: "",
   className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 space-y-4 h-fit"
   data-testid="create-duel-form"
 >
-  <h2 className="font-bold text-slate-900 flex items-center gap-2">
-    <Plus size={18} className="text-[#D92525]" />
-    Ny duell
-  </h2>
+<h2 className="font-bold text-slate-900 flex items-center gap-2">
+  <Plus size={18} className="text-[#D92525]" />
+  Ny duell
+</h2>
 
+<div>
   <label className="text-sm font-semibold text-slate-700">
     Skytter 1
   </label>

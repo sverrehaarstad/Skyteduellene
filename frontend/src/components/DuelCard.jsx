@@ -35,9 +35,11 @@ useEffect(() => {
 }, [myPick]);
   const tc = duel.tip_counts || { "1": 0, X: 0, "2": 0 };
   const totalTips = tc["1"] + tc["X"] + tc["2"];
-  const isLocked = duel.start_at
-  ? new Date() >= new Date(duel.start_at)
-  : false;
+  const timeLocked = duel.start_at
+    ? new Date() >= new Date(duel.start_at)
+    : false;
+  const tournamentLocked = Boolean(duel.is_locked);
+  const isLocked = timeLocked || tournamentLocked;
 
   const handlePick = async (choice) => {
     if (isLocked) {
@@ -56,7 +58,7 @@ useEffect(() => {
       toast.success("Tips lagret!");
       onTipped && onTipped();
     } catch (e) {
-      toast.error(formatApiError(e.response?.data?.detail));
+      toast.error(formatApiError(e.response?.data?.error || e.response?.data?.detail));
     } finally {
       setSaving(false);
     }
@@ -90,7 +92,7 @@ useEffect(() => {
     }`}
   />
   <span className="text-xs font-semibold text-slate-500">
-    {isLocked ? "Tipping stengt" : "Åpen for tipping"}
+    {tournamentLocked ? "Konkurransen er låst" : isLocked ? "Tipping stengt" : "Åpen for tipping"}
   </span>
 </div>
       </div>

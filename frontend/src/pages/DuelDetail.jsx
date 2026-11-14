@@ -45,7 +45,7 @@ export default function DuelDetail() {
       load();
       refreshMe();
     } catch (e) {
-      toast.error(formatApiError(e.response?.data?.detail));
+      toast.error(formatApiError(e.response?.data?.error || e.response?.data?.detail));
     } finally {
       setSaving(false);
     }
@@ -76,6 +76,11 @@ export default function DuelDetail() {
   if (!duel) return <div className="max-w-2xl mx-auto px-4 py-16 text-slate-500">Laster...</div>;
 
   const isOpen = duel.status === "open";
+  const tournamentLocked = Boolean(duel.is_locked);
+  const timeLocked = duel.start_at
+    ? new Date() >= new Date(duel.start_at)
+    : false;
+  const canTip = isOpen && !tournamentLocked && !timeLocked;
   const tc = duel.tip_counts || { "1": 0, X: 0, "2": 0 };
   const totalTips = tc["1"] + tc["X"] + tc["2"];
 
@@ -92,7 +97,7 @@ export default function DuelDetail() {
         <div className="flex items-center justify-between mb-6">
           <span className="text-xs font-semibold uppercase tracking-wider text-[#B91C1C] bg-[#FEF2F2] px-2.5 py-1 rounded-full">{duel.discipline}</span>
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${isOpen ? "bg-green-50 text-[#16A34A]" : "bg-slate-100 text-slate-600"}`}>
-            {isOpen ? "Åpen for tipping" : "Avsluttet"}
+            {!isOpen ? "Avsluttet" : tournamentLocked ? "Konkurransen er låst" : timeLocked ? "Tipping stengt" : "Åpen for tipping"}
           </span>
         </div>
 
@@ -161,8 +166,18 @@ export default function DuelDetail() {
 </div>
 
         {/* Tipping */}
-        {isOpen && (
-          <div className="grid grid-cols-3 gap-2 mt-8">
+                {/* Tipping */}
+        {isOpen && tournamentLocked && (
+          <p className="mt-6 text-center text-sm font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+            Denne konkurransen er låst. Det er ikke mulig å tippe eller endre tips nå.
+          </p>
+        )}
+        {isOpen && timeLocked && !tournamentLocked && (
+          <p className="mt-6 text-center text-sm font-semibold text-slate-600 bg-slate-100 rounded-lg px-3 py-2">
+            Tippefristen for denne duellen har gått ut.
+          </p>
+        )}
+        {canTip && (
             {[["1", duel.shooter1.split(" ")[0]], ["X", "ved lik poengsum"], ["2", duel.shooter2.split(" ")[0]]].map(([val, sub]) => (
               <button key={val} onClick={() => placeTip(val)} disabled={saving} data-testid={`detail-tip-${val}`}
                 className={`flex flex-col items-center py-4 rounded-xl border transition-colors duration-200 ${
@@ -174,7 +189,7 @@ export default function DuelDetail() {
             ))}
           </div>
         )}
-        {myPick && isOpen && (
+        {myPick && canTip && (
   <div className="text-center mt-3">
     <p className="text-xs text-[#16A34A] font-semibold flex items-center justify-center gap-1">
       <Check size={12} /> Ditt tips er registrert

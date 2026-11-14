@@ -280,6 +280,15 @@ class TournamentAccess(db.Model):
     is_private = db.Column(db.Boolean, default=False)
     access_code_hash = db.Column(db.String(255), default="")
 
+class TournamentLock(db.Model):
+    __tablename__ = 'tournament_locks'
+
+    tournament_id = db.Column(
+        db.Integer,
+        db.ForeignKey('tournaments.id'),
+        primary_key=True
+    )
+    is_locked = db.Column(db.Boolean, default=False, nullable=False)
 
 class TournamentMember(db.Model):
     __tablename__ = 'tournament_members'
@@ -754,7 +763,46 @@ def update_duel(duel_id):
 
     db.session.commit()
     return jsonify(duel.to_dict()), 200
-    
+
+@app.route('/api/tournaments/<int:tid>/lock', methods=['PUT'])
+@jwt_required()
+def set_tournament_lock(tid):
+    user_id = int(get_jwt_identity())
+    user = User.query.get(user_id)
+
+    if not user or get_role(user.username) != "admin":
+        return jsonify({"error": "Ingen tilgang"}), 403
+
+    tournament = Tournament.query.get(tid)
+
+    if not tournament:
+        return jsonify({"error": "Konkurransen finnes ikke"}), 404
+
+    data = request.get_json() or {}
+    is_locked = data.get("is_locked")
+
+    if not isinstance(is_locked, bool):
+        return jsonify({"error": "Ugyldig låsestatus"}), 400
+
+    lock = TournamentLock.query.filter_by(
+        tournament_id=tid
+    ).first()
+
+    if not lock:
+        lock = TournamentLock(
+            tournament_id=tid,
+            is_locked=is_locked
+        )
+        db.session.add(lock)
+    else:
+        lock.is_locked = is_locked
+
+    db.session.commit()
+
+    return jsonify({
+        "success": True,
+        "is_locked": lock.is_locked
+    }), 200   
 @app.route('/api/tournaments/<int:tid>', methods=['DELETE'])
 @jwt_required()
 def delete_tournament(tid):
@@ -875,9 +923,25 @@ def tip_duel(duel_id):
     duel = Duel.query.get(duel_id)
     if not duel:
         return jsonify({"error": "Duell ikke funnet"}), 404
-    links = DuelTournament.query.filter_by(duel_id=duel.id).all()
+links = DuelTournament.query.filter_by(duel_id=duel.id).all()
 
-    private_tournament_ids = []
+locked_tournament_ids = [
+    link.tournament_id
+    for link in links
+    if (
+        (lock := TournamentLock.query.filter_by(
+            tournament_id=link.tournament_id
+        ).first())
+        and lock.is_locked
+    )
+]
+
+if locked_tournament_ids:
+    return jsonify({
+        "error": "Denne duellen tilhører en låst konkurranse. Tipping er stengt."
+    }), 403
+
+private_tournament_ids = []
 
     for link in links:
         access = TournamentAccess.query.filter_by(
@@ -942,10 +1006,25 @@ def delete_own_tip(duel_id):
     duel = Duel.query.get(duel_id)
     if not duel or duel.is_deleted:
         return jsonify({"error": "Duell ikke funnet"}), 404
-    links = DuelTournament.query.filter_by(duel_id=duel.id).all()
+links = DuelTournament.query.filter_by(duel_id=duel.id).all()
 
-    private_tournament_ids = []
+locked_tournament_ids = [
+    link.tournament_id
+    for link in links
+    if (
+        (lock := TournamentLock.query.filter_by(
+            tournament_id=link.tournament_id
+        ).first())
+        and lock.is_locked
+    )
+]
 
+if locked_tournament_ids:
+    return jsonify({
+        "error": "Denne duellen tilhører en låst konkurranse. Tipping er stengt."
+    }), 403
+
+private_tournament_ids = []
     for link in links:
         access = TournamentAccess.query.filter_by(
             tournament_id=link.tournament_id

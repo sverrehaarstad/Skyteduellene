@@ -923,9 +923,9 @@ def tip_duel(duel_id):
     duel = Duel.query.get(duel_id)
     if not duel:
         return jsonify({"error": "Duell ikke funnet"}), 404
-links = DuelTournament.query.filter_by(duel_id=duel.id).all()
+    links = DuelTournament.query.filter_by(duel_id=duel.id).all()
 
-locked_tournament_ids = [
+    locked_tournament_ids = [
     link.tournament_id
     for link in links
     if (
@@ -936,12 +936,12 @@ locked_tournament_ids = [
     )
 ]
 
-if locked_tournament_ids:
+    if locked_tournament_ids:
     return jsonify({
         "error": "Denne duellen tilhører en låst konkurranse. Tipping er stengt."
     }), 403
 
-private_tournament_ids = []
+    private_tournament_ids = []
 
     for link in links:
         access = TournamentAccess.query.filter_by(
@@ -1006,9 +1006,9 @@ def delete_own_tip(duel_id):
     duel = Duel.query.get(duel_id)
     if not duel or duel.is_deleted:
         return jsonify({"error": "Duell ikke funnet"}), 404
-links = DuelTournament.query.filter_by(duel_id=duel.id).all()
+    links = DuelTournament.query.filter_by(duel_id=duel.id).all()
 
-locked_tournament_ids = [
+    locked_tournament_ids = [
     link.tournament_id
     for link in links
     if (
@@ -1019,12 +1019,12 @@ locked_tournament_ids = [
     )
 ]
 
-if locked_tournament_ids:
+    if locked_tournament_ids:
     return jsonify({
         "error": "Denne duellen tilhører en låst konkurranse. Tipping er stengt."
     }), 403
 
-private_tournament_ids = []
+    private_tournament_ids = []
     for link in links:
         access = TournamentAccess.query.filter_by(
             tournament_id=link.tournament_id

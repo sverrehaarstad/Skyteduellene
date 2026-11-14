@@ -1,52 +1,93 @@
-import { useEffect, useState } from "react";
-import api from "@/lib/api";
-import { Trophy } from "lucide-react";
 
-const medal = ["#EAB308", "#94A3B8", "#B45309"];
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import api from "@/lib/api";
+import { Trophy, ChevronRight } from "lucide-react";
 
 export default function Leaderboard() {
-  const [rows, setRows] = useState([]);
+  const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
-    api.get("/leaderboard").then(({ data }) => {
-      setRows(data);
-      setLoading(false);
-    });
+    api.get("/tournaments")
+      .then(({ data }) => {
+        setTours(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
+
+  const filteredTours = tours
+    .filter((t) =>
+      t.name.toLowerCase().includes(search.toLowerCase())
+    )
+    .sort((a, b) => {
+      const dateA = Date.parse(a.latest_duel_start_at || "") || 0;
+      const dateB = Date.parse(b.latest_duel_start_at || "") || 0;
+      return dateB - dateA;
+    });
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
       <div className="flex items-center gap-2 mb-6">
         <Trophy size={22} className="text-[#D92525]" />
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900" style={{ fontFamily: "Outfit, sans-serif" }}>Toppliste</h1>
+        <h1
+          className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900"
+          style={{ fontFamily: "Outfit, sans-serif" }}
+        >
+          Toppliste
+        </h1>
       </div>
+
+      <input
+        type="text"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Søk etter konkurranse..."
+        className="w-full mb-6 px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-[#D92525]"
+      />
 
       {loading ? (
         <p className="text-slate-500">Laster...</p>
-      ) : rows.length === 0 ? (
-        <div className="text-center py-16 bg-white border border-dashed border-slate-300 rounded-xl" data-testid="no-leaderboard">
-          <p className="text-slate-500 font-semibold">Ingen tippere ennå.</p>
+      ) : tours.length === 0 ? (
+        <div className="text-center py-16 bg-white border border-dashed border-slate-300 rounded-xl">
+          <p className="text-slate-500 font-semibold">
+            Ingen konkurranser opprettet ennå.
+          </p>
+        </div>
+      ) : filteredTours.length === 0 ? (
+        <div className="text-center py-16 bg-white border border-dashed border-slate-300 rounded-xl">
+          <p className="text-slate-500 font-semibold">
+            Ingen konkurranser funnet.
+          </p>
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden" data-testid="leaderboard-table">
-          <div className="grid grid-cols-12 px-4 py-3 bg-slate-50 border-b border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-500">
-            <div className="col-span-1">#</div>
-            <div className="col-span-5">Tipper</div>
-            <div className="col-span-2 text-center">Riktige</div>
-            <div className="col-span-2 text-center">Treff %</div>
-            <div className="col-span-2 text-right">Poeng</div>
-          </div>
-          {rows.map((r, i) => (
-            <div key={r.id} className={`grid grid-cols-12 px-4 py-3 items-center border-b border-slate-100 last:border-0 ${i < 3 ? "bg-[#FBFBFD]" : ""}`} data-testid={`lb-row-${i}`}>
-              <div className="col-span-1">
-                <span className="w-6 h-6 flex items-center justify-center rounded-full text-xs font-black text-white" style={{ fontFamily: "Outfit, sans-serif", background: medal[i] || "#0F172A" }}>{i + 1}</span>
+        <div className="space-y-3">
+          {filteredTours.map((t) => (
+            <Link
+              key={t.id}
+              to={`/serie/${t.id}`}
+              className="flex items-center justify-between bg-white border border-slate-200 rounded-xl p-5 hover:border-[#FCA5A5] transition-colors"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-11 h-11 rounded-full bg-[#FEF2F2] flex items-center justify-center">
+                  <Trophy size={20} className="text-[#EAB308]" />
+                </div>
+
+                <div>
+                  <p className="font-bold text-slate-900">
+                    {t.name}{t.is_private ? " 🔒" : ""}
+                  </p>
+                  <p className="text-sm text-slate-500">
+                    {t.season ? `${t.season} · ` : ""}
+                    {t.duel_count} {t.duel_count === 1 ? "duell" : "dueller"}
+                  </p>
+                </div>
               </div>
-              <div className="col-span-5 font-bold text-slate-900 truncate">{r.name}</div>
-              <div className="col-span-2 text-center font-mono text-slate-700">{r.correct}/{r.total_tips}</div>
-              <div className="col-span-2 text-center font-mono text-slate-500 text-sm">{r.accuracy}%</div>
-              <div className="col-span-2 text-right font-mono font-bold text-lg text-[#D92525]">{r.points}</div>
-            </div>
+
+              <ChevronRight size={20} className="text-slate-300" />
+            </Link>
           ))}
         </div>
       )}

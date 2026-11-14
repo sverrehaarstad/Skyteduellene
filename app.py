@@ -262,7 +262,9 @@ class Tournament(db.Model):
         access = TournamentAccess.query.filter_by(
             tournament_id=self.id
         ).first()
-
+        lock = TournamentLock.query.filter_by(
+            tournament_id=self.id
+        ).first()
         return {
             "id": self.id,
             "name": self.name,
@@ -270,6 +272,7 @@ class Tournament(db.Model):
             "duel_count": duel_count,
             "latest_duel_start_at": latest_duel_start_at,
             "is_private": access.is_private if access else False
+            "is_locked": lock.is_locked if lock else False
         }
     
 

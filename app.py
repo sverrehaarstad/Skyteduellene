@@ -244,7 +244,21 @@ class Tournament(db.Model):
     )
     .count()
 )
+        latest_duel = (
+            Duel.query
+            .join(DuelTournament, DuelTournament.duel_id == Duel.id)
+            .filter(
+                DuelTournament.tournament_id == self.id,
+                Duel.is_deleted == False,
+                Duel.start_at != ""
+            )
+            .order_by(Duel.start_at.desc())
+            .first()
+        )
 
+        latest_duel_start_at = (
+            latest_duel.start_at if latest_duel else ""
+        )
         access = TournamentAccess.query.filter_by(
             tournament_id=self.id
         ).first()
@@ -254,8 +268,10 @@ class Tournament(db.Model):
             "name": self.name,
             "season": self.season,
             "duel_count": duel_count,
+            "latest_duel_start_at": latest_duel_start_at,
             "is_private": access.is_private if access else False
         }
+    
 
 class TournamentAccess(db.Model):
     __tablename__ = 'tournament_access'

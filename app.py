@@ -271,7 +271,7 @@ class Tournament(db.Model):
             "season": self.season,
             "duel_count": duel_count,
             "latest_duel_start_at": latest_duel_start_at,
-            "is_private": access.is_private if access else False
+            "is_private": access.is_private if access else False,
             "is_locked": lock.is_locked if lock else False
         }
     

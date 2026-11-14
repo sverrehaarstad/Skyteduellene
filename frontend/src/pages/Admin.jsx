@@ -200,6 +200,31 @@ shooter2_img: "",
     load();
   };
 
+  const toggleTournamentLock = async (tournament) => {
+    const newLockState = !tournament.is_locked;
+
+    const message = newLockState
+      ? `Låse ${tournament.name}? Ingen vil da kunne tippe, endre eller slette tips på duellene i konkurransen.`
+      : `Låse opp ${tournament.name}?`;
+
+    if (!window.confirm(message)) return;
+
+    try {
+      await api.put(`/tournaments/${tournament.id}/lock`, {
+        is_locked: newLockState,
+      });
+
+      toast.success(
+        newLockState ? "Konkurransen er låst" : "Konkurransen er låst opp"
+      );
+      await load();
+    } catch (err) {
+      toast.error(
+        formatApiError(err.response?.data?.error || err.response?.data?.detail)
+      );
+    }
+  };
+
     const resetSeasonPoints = async (id) => {
     if (!window.confirm("Nullstille poengene i denne konkurransen?")) {
       return;
@@ -531,6 +556,17 @@ shooter2_img: "",
 >
   Nullstill poeng
 </button>
+                    <button
+                      type="button"
+                      onClick={() => toggleTournamentLock(t)}
+                      className={`px-2 py-1 text-xs font-bold rounded-full border ${
+                        t.is_locked
+                          ? "text-green-700 border-green-200 hover:bg-green-50"
+                          : "text-red-700 border-red-200 hover:bg-red-50"
+                      }`}
+                    >
+                      {t.is_locked ? "Lås opp" : "Lås"}
+                    </button>
                     {t.season && (
   <button
     type="button"

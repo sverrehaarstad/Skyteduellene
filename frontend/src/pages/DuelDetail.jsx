@@ -166,7 +166,6 @@ export default function DuelDetail() {
 </div>
 
         {/* Tipping */}
-                {/* Tipping */}
         {isOpen && tournamentLocked && (
           <p className="mt-6 text-center text-sm font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
             Denne konkurransen er låst. Det er ikke mulig å tippe eller endre tips nå.
@@ -178,6 +177,7 @@ export default function DuelDetail() {
           </p>
         )}
         {canTip && (
+          <div className="grid grid-cols-3 gap-2 mt-8">
             {[["1", duel.shooter1.split(" ")[0]], ["X", "ved lik poengsum"], ["2", duel.shooter2.split(" ")[0]]].map(([val, sub]) => (
               <button key={val} onClick={() => placeTip(val)} disabled={saving} data-testid={`detail-tip-${val}`}
                 className={`flex flex-col items-center py-4 rounded-xl border transition-colors duration-200 ${

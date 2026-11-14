@@ -132,8 +132,16 @@ class Duel(db.Model):
         tournament_ids = [
             link.tournament_id for link in tournament_links
         ]
+        locked_tournament = (
+            TournamentLock.query.filter(
+                TournamentLock.tournament_id.in_(tournament_ids),
+                TournamentLock.is_locked == True
+            ).first()
+            if tournament_ids else None
+        )
         return {
             "id": self.id,
+            "is_locked": bool(locked_tournament),
             "tip_counts": tip_counts,
             "shooter1": self.shooter1,
             "shooter2": self.shooter2,
@@ -828,6 +836,10 @@ def delete_tournament(tid):
     ).delete()
 
     TournamentAccess.query.filter_by(
+        tournament_id=tid
+    ).delete()
+
+    TournamentLock.query.filter_by(
         tournament_id=tid
     ).delete()
 

@@ -30,14 +30,19 @@ export default function Leaderboard() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
-      <div className="flex items-center gap-2 mb-6">
-        <Trophy size={22} className="text-[#D92525]" />
-        <h1
-          className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900"
-          style={{ fontFamily: "Outfit, sans-serif" }}
-        >
-          Toppliste
-        </h1>
+      <div className="flex items-start gap-2 mb-6">
+        <Trophy size={22} className="text-[#D92525] mt-1" />
+        <div>
+          <h1
+            className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900"
+            style={{ fontFamily: "Outfit, sans-serif" }}
+          >
+            Toppliste
+          </h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Se hvordan du ligger an i konkurransene
+          </p>
+        </div>
       </div>
 
       <input

@@ -190,6 +190,20 @@ const joinPrivateSeries = async (e) => {
       )}
     </div>
   </div>
+   {d.status === "finished" && (
+  <p className="text-xs font-semibold text-green-700 mt-2">
+    {d.outcome === "1"
+      ? `Vinner: ${d.shooter1}`
+      : d.outcome === "2"
+        ? `Vinner: ${d.shooter2}`
+        : d.outcome === "X"
+          ? "Resultat: Uavgjort"
+          : "Resultat registrert"}
+    {d.score1 !== "" && d.score2 !== "" && (
+      <span className="text-slate-500 font-normal"> · {d.score1}–{d.score2}</span>
+    )}
+  </p>
+)}
    {myTips[d.id] && (
   <p className="text-xs font-semibold text-[#D92525] mt-2">
     Ditt tips:{" "}

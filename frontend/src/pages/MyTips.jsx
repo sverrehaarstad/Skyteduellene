@@ -46,7 +46,16 @@ export default function MyTips() {
       ) : (
         <div className="space-y-3" data-testid="mytips-list">
         {[...tips]
-  .sort((a, b) => new Date(b.duel.start_at || 0) - new Date(a.duel.start_at || 0))
+  .sort((a, b) => {
+    const aFinished = a.duel.status === "finished";
+    const bFinished = b.duel.status === "finished";
+
+    if (aFinished !== bFinished) {
+      return aFinished ? 1 : -1;
+    }
+
+    return new Date(b.duel.start_at || 0) - new Date(a.duel.start_at || 0);
+  })
   .map((t) => (
             <div key={t.id} className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between gap-3" data-testid={`mytip-${t.id}`}>
               <div className="min-w-0">
